@@ -254,15 +254,15 @@ local Library = {
     OriginalMinSize = Vector2.new(480, 360),
     MinSize = Vector2.new(480, 360),
     DPIScale = 1,
-    CornerRadius = 4,
+    CornerRadius = 20,
 
     IsLightTheme = false,
     Scheme = {
-        BackgroundColor = Color3.fromRGB(15, 15, 15),
-        MainColor = Color3.fromRGB(25, 25, 25),
-        AccentColor = Color3.fromRGB(125, 85, 255),
-        OutlineColor = Color3.fromRGB(40, 40, 40),
-        FontColor = Color3.new(1, 1, 1),
+        BackgroundColor = Color3.fromRGB(6, 10, 18),
+        MainColor = Color3.fromRGB(10, 18, 30),
+        AccentColor = Color3.fromRGB(24, 144, 255),
+        OutlineColor = Color3.fromRGB(22, 40, 64),
+        FontColor = Color3.fromRGB(230, 240, 255),
         Font = Font.fromEnum(Enum.Font.Code),
 
         RedColor = Color3.fromRGB(255, 50, 50),
@@ -369,7 +369,7 @@ local Templates = {
         SearchbarSize = UDim2.fromScale(1, 1),
         GlobalSearch = false,
 
-        CornerRadius = 4,
+        CornerRadius = 20,
         NotifySide = "Right",
         ShowCustomCursor = true,
 
@@ -15328,6 +15328,7 @@ function Library:AddESPManager(Window, Info)
         GradientAnimationSpeed = 4,
 
         UpdateRate = 0.2,
+        MaxDistance = 2000,
         RetryUnknown = 2,
         Fallback = "rbxassetid://93909275221626",
     }
@@ -15422,23 +15423,33 @@ function Library:AddESPManager(Window, Info)
         return ids
     end
 
+    local Indexing = false
+    local NextIndex = 0
+
     local function buildIndex()
+        Indexing = true
         local items = ReplicatedStorage:FindFirstChild("Items")
-        if not items then
-            return
-        end
-        for _, item in ipairs(items:GetDescendants()) do
-            if item:IsA("Tool") then
-                if not ByName[item.Name] then
-                    ByName[item.Name] = item
+        if items then
+            local count = 0
+            for _, item in ipairs(items:GetDescendants()) do
+                if item:IsA("Tool") then
+                    if not ByName[item.Name] then
+                        ByName[item.Name] = item
+                    end
+                    for meshId in pairs(collectMeshIds(item)) do
+                        MeshOwners[meshId] = MeshOwners[meshId] or {}
+                        table.insert(MeshOwners[meshId], item)
+                    end
                 end
-                for meshId in pairs(collectMeshIds(item)) do
-                    MeshOwners[meshId] = MeshOwners[meshId] or {}
-                    table.insert(MeshOwners[meshId], item)
+                count = count + 1
+                if count % 100 == 0 then
+                    task.wait()
                 end
             end
         end
         Indexed = next(ByName) ~= nil
+        NextIndex = os.clock() + 10
+        Indexing = false
     end
 
     local function matchByMesh(meshIds)
@@ -15494,8 +15505,8 @@ function Library:AddESPManager(Window, Info)
     end
 
     local function resolveItem(tool)
-        if not Indexed then
-            buildIndex()
+        if not Indexed and not Indexing and os.clock() >= NextIndex then
+            task.spawn(buildIndex)
         end
 
         local meshIds = collectMeshIds(tool)
@@ -15960,41 +15971,50 @@ function Library:AddESPManager(Window, Info)
         return obj.Hrp ~= nil and obj.Humanoid ~= nil
     end
 
-    local function updateESP(obj, camera, anyEnabled, now)
-        if not anyEnabled or not refreshCharacter(obj) then
+    local function hideESP(obj)
+        if obj.Box.Visible then
             obj.Box.Visible = false
-            obj.WasVisible = false
+        end
+        obj.WasVisible = false
+    end
+
+    local function updateESP(obj, camera, cameraPosition, now)
+        if not refreshCharacter(obj) then
+            hideESP(obj)
             return
         end
 
         local hrp = obj.Hrp
-        local humanoid = obj.Humanoid
-
-        if humanoid.Health <= 0 then
-            obj.Box.Visible = false
-            obj.WasVisible = false
+        if obj.Humanoid.Health <= 0 then
+            hideESP(obj)
             return
         end
 
-        local hrpPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
-        if not onScreen then
-            obj.Box.Visible = false
-            obj.WasVisible = false
+        local position = hrp.Position
+        local offset = position - cameraPosition
+        local maxDistance = Settings.MaxDistance
+        if offset.X * offset.X + offset.Y * offset.Y + offset.Z * offset.Z > maxDistance * maxDistance then
+            hideESP(obj)
             return
         end
 
         local head = obj.Head
-        local topPos = head and head.Position + Vector3.new(0, 0.5, 0) or (hrp.Position + Vector3.new(0, 3, 0))
-        local bottomPos = hrp.Position - Vector3.new(0, 3.5, 0)
+        local topPos = head and head.Position + Vector3.new(0, 0.5, 0) or (position + Vector3.new(0, 3, 0))
+        local bottomPos = position - Vector3.new(0, 3.5, 0)
 
-        local topScreen = camera:WorldToViewportPoint(topPos)
-        local bottomScreen = camera:WorldToViewportPoint(bottomPos)
+        local topScreen, topOn = camera:WorldToViewportPoint(topPos)
+        local bottomScreen, bottomOn = camera:WorldToViewportPoint(bottomPos)
+        if not (topOn or bottomOn) or topScreen.Z <= 0 or bottomScreen.Z <= 0 then
+            hideESP(obj)
+            return
+        end
 
         local height = math.max(math.abs(topScreen.Y - bottomScreen.Y), 2)
         local width = height * 0.65
+        local box = obj.Box
 
-        obj.Box.Position = UDim2.fromOffset(hrpPos.X - (width / 2), topScreen.Y)
-        obj.Box.Size = UDim2.fromOffset(width, height)
+        box.Position = UDim2.fromOffset((topScreen.X + bottomScreen.X) * 0.5 - width * 0.5, topScreen.Y)
+        box.Size = UDim2.fromOffset(width, height)
 
         if not obj.WasVisible then
             obj.WasVisible = true
@@ -16002,45 +16022,79 @@ function Library:AddESPManager(Window, Info)
         end
 
         if now >= obj.NextSlow then
-            obj.NextSlow = now + Settings.UpdateRate
+            obj.NextSlow = now + Settings.UpdateRate * (0.8 + math.random() * 0.4)
             updateContent(obj, now)
         end
 
-        local rotation = Settings.GradientAnimation and Angle or 0
-        for index, gradient in ipairs(obj.Gradients) do
-            local target = BaseRotation[index] + rotation
-            if gradient.Rotation ~= target then
-                gradient.Rotation = target
+        if Settings.GradientAnimation then
+            obj.Animated = true
+            for index, gradient in ipairs(obj.Gradients) do
+                if gradient.Enabled then
+                    gradient.Rotation = BaseRotation[index] + Angle
+                end
+            end
+        elseif obj.Animated then
+            obj.Animated = false
+            for index, gradient in ipairs(obj.Gradients) do
+                gradient.Rotation = BaseRotation[index]
             end
         end
 
-        obj.Box.Visible = true
+        if not box.Visible then
+            box.Visible = true
+        end
     end
 
+    local Built = false
+    local WasActive = false
+
     local function onPlayerAdded(player)
-        if player == LocalPlayer then
+        if player == LocalPlayer or not Built then
             return
         end
         Objects[player] = createESP(player)
     end
 
-    for _, player in ipairs(Players:GetPlayers()) do
-        onPlayerAdded(player)
+    local function ensureObjects()
+        Built = true
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and not Objects[player] then
+                Objects[player] = createESP(player)
+            end
+        end
     end
 
     table.insert(Connections, Players.PlayerAdded:Connect(onPlayerAdded))
     table.insert(Connections, Players.PlayerRemoving:Connect(removeESP))
 
     RunService:BindToRenderStep("ESPUpdate", Enum.RenderPriority.Camera.Value + 1, function(dt)
+        Angle = (Angle + dt * Settings.GradientAnimationSpeed * 20) % 360
+
+        local active = Settings.Enabled and (Settings.Box or Settings.Glow or Settings.HealthBar or Settings.HealthText or Settings.Name or Settings.DisplayName or Settings.Avatar or Settings.Weapon or Settings.Distance or Settings.Backpack)
+        if not active then
+            if WasActive then
+                WasActive = false
+                for _, obj in pairs(Objects) do
+                    hideESP(obj)
+                end
+            end
+            return
+        end
+
         local camera = workspace.CurrentCamera
         if not camera then
             return
         end
-        local anyEnabled = Settings.Enabled and (Settings.Box or Settings.Glow or Settings.HealthBar or Settings.HealthText or Settings.Name or Settings.DisplayName or Settings.Avatar or Settings.Weapon or Settings.Distance or Settings.Backpack)
+
+        WasActive = true
+        if not Built then
+            ensureObjects()
+        end
+
+        local cameraPosition = camera.CFrame.Position
         local now = os.clock()
-        Angle = (Angle + dt * Settings.GradientAnimationSpeed * 20) % 360
         for _, obj in pairs(Objects) do
-            updateESP(obj, camera, anyEnabled, now)
+            updateESP(obj, camera, cameraPosition, now)
         end
     end)
 
@@ -16206,29 +16260,27 @@ function Library:AddESPManager(Window, Info)
     PreviewObject.Box.Visible = true
 
     Library:GiveSignal(RunService.RenderStepped:Connect(function(dt)
-        if not Library.Toggled then
+        if not Library.Toggled or Library.ActiveTab ~= Tab then
             return
         end
 
         if PreviewState.Rotate then
             PreviewState.Rotation = (PreviewState.Rotation + dt * PreviewState.Speed) % 360
+            Dummy:PivotTo(CFrame.Angles(0, math.rad(PreviewState.Rotation), 0))
         end
-        Dummy:PivotTo(CFrame.Angles(0, math.rad(PreviewState.Rotation), 0))
 
         local now = os.clock()
         if now >= PreviewState.Next then
-            PreviewState.Next = now + 0.1
+            PreviewState.Next = now + 0.15
             updateContent(PreviewObject, now)
             if Settings.Distance then
                 PreviewObject.DistanceText.Text = "25 Studs"
             end
         end
 
-        local rotation = Settings.GradientAnimation and Angle or 0
-        for index, gradient in ipairs(PreviewObject.Gradients) do
-            local target = BaseRotation[index] + rotation
-            if gradient.Rotation ~= target then
-                gradient.Rotation = target
+        if Settings.GradientAnimation then
+            for index, gradient in ipairs(PreviewObject.Gradients) do
+                gradient.Rotation = BaseRotation[index] + Angle
             end
         end
     end))
@@ -16277,6 +16329,7 @@ function Library:AddESPManager(Window, Info)
 
     local PerformanceGroup = Tab:AddRightGroupbox("Performance", "gauge")
     AddSlider(PerformanceGroup, "UpdateRate", "Update Rate", 0.05, 1, 2, "s")
+    AddSlider(PerformanceGroup, "MaxDistance", "Max Distance", 100, 5000, 0, " studs")
 
     return {
         Tab = Tab,

@@ -12,6 +12,7 @@ local Window = Library:CreateWindow({
     Footer = "Example",
     NotifySide = "Right",
     ShowCustomCursor = true,
+    CornerRadius = 20,
 })
 
 local ExampleTab = Window:AddTab("Example", "box")
@@ -236,6 +237,17 @@ MenuGroup:AddDropdown("UiDPIScale", {
     end,
 })
 
+MenuGroup:AddSlider("UiCornerRadius", {
+    Text = "Corner Radius",
+    Default = 20,
+    Min = 0,
+    Max = 20,
+    Rounding = 0,
+    Callback = function(Value)
+        Window:SetCornerRadius(Value)
+    end,
+})
+
 MenuGroup:AddDivider()
 
 MenuGroup:AddButton({
@@ -247,6 +259,15 @@ MenuGroup:AddButton({
 
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
+
+ThemeManager:SetDefaultTheme({
+    FontColor = "e6f0ff",
+    MainColor = "0a121e",
+    AccentColor = "1890ff",
+    BackgroundColor = "060a12",
+    OutlineColor = "16283f",
+    FontFace = "Code",
+})
 
 SaveManager:IgnoreThemeSettings()
 
