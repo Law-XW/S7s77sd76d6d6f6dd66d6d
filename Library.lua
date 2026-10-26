@@ -164,11 +164,9 @@ local Library = {
     LocalPlayer = LocalPlayer,
     IsRobloxFocused = true,
 
-    --// Device \\--
     DevicePlatform = nil,
     IsMobile = false,
 
-    --// Obsidian Windows \\--
     ScreenGui = nil,
     Floats = nil,
     Overlay = nil,
@@ -176,47 +174,37 @@ local Library = {
     Window = nil,
     WindowContainer = nil,
 
-    --// Search \\--
     SearchText = "",
     Searching = false,
     GlobalSearch = false,
     LastSearchTab = nil,
 
-    --// Tabs \\--
     ActiveTab = nil,
     PreviousTab = nil,
     Tabs = {},
     TabButtons = {},
 
-    --// Dependency Boxes \\--
     DependencyBoxes = {},
 
-    --// Keybinds Frame \\--
     KeybindFrame = nil,
     KeybindContainer = nil,
     KeybindToggles = {},
     KeybindMenu = nil,
 
-    --// Notifications \\--
     Notifications = {},
     NotifySide = "Right",
     NotifyTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 
-    --// Dialogues \\--
     Dialogues = {},
     ActiveDialog = nil,
 
-    --// Loading Window \\--
     ActiveLoading = nil,
 
-    --// Context Menu \\--
-    ContextMenus = {}, 
+    ContextMenus = {},
 
-    --// Corners \\--
     Corners = {},
     SpecificCorners = {},
 
-    --// Animations \\--
     TweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 
     TabTransitionInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
@@ -238,17 +226,14 @@ local Library = {
         KeyPicker = false
     },
 
-    --// States \\--
     Toggled = false,
     Unloaded = false,
 
-    --// Elements \\--
     Labels = Labels,
     Buttons = Buttons,
     Toggles = Toggles,
     Options = Options,
 
-    --// Options \\--
     ToggleKeybind = Enum.KeyCode.RightControl,
     ShowToggleFrameInKeybinds = true,
 
@@ -259,12 +244,10 @@ local Library = {
     CantDragForced = false,
     DraggableElements = {},
 
-    --// Pop Out \\--
     PopOutSnapDistance = 80,
     PopOutDragThreshold = 8,
     PopOutHoldTime = 0.15,
 
-    --// Signals \\--
     Signals = {},
     UnloadSignals = {},
 
@@ -273,7 +256,6 @@ local Library = {
     DPIScale = 1,
     CornerRadius = 4,
 
-    --// Scheme \\--
     IsLightTheme = false,
     Scheme = {
         BackgroundColor = Color3.fromRGB(15, 15, 15),
@@ -291,20 +273,16 @@ local Library = {
         BackgroundImage = ""
     },
 
-    --// Registry \\--
     Registry = {},
     Scales = {},
     ScalesOffset = {},
 
-    --// Mouse \\--
     OriginalMouseIconEnabled = UserInputService.MouseIconEnabled,
     ShowCursorBinding = string.sub(tostring({}), 10),
 
-    --// Image Manager \\--
     ImageManager = CustomImageManager,
 
-    --// Misc \\--
-    Notify = nil, Toggle = nil -- we love luau lsp
+    Notify = nil, Toggle = nil
 }
 
 if RunService:IsStudio() then
@@ -325,7 +303,7 @@ else
 end
 
 local Templates = {
-    --// UI \\--
+
     Frame = {
         BorderSizePixel = 0,
     },
@@ -370,7 +348,6 @@ local Templates = {
         ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
     },
 
-    --// Library \\--
     Window = {
         Title = "No Title",
         Footer = "No Footer",
@@ -384,7 +361,6 @@ local Templates = {
         Resizable = true,
         AlwaysOnTop = false,
 
-        --// Window Snapping \\--
         Snapping = false,
         SnapDistance = 28,
         SnapMargin = 8,
@@ -411,18 +387,14 @@ local Templates = {
         SidebarCompacted = false,
         MinContainerWidth = 256,
 
-        --// Snapping \\--
         MinSidebarWidth = 128,
         SidebarCompactWidth = 48,
         SidebarCollapseThreshold = 0.5,
 
-        --// Dragging \\--
         CompactWidthActivation = 128,
 
-        --// Background \\--
         BackgroundImage = "",
 
-        --// Animations \\--
         Animations = {
             ToggleWindow = false,
             TabSwitch = false,
@@ -588,7 +560,6 @@ local Templates = {
         Visible = true,
     },
 
-    --// Addons \\-
     KeyPicker = {
         Text = "KeyPicker",
 
@@ -632,7 +603,6 @@ local SideIndex = {
     right = 2,
 }
 
---// Scheme Functions \\--
 local SchemeReplaceAlias = {
     RedColor = "Red",
     WhiteColor = "White",
@@ -667,7 +637,6 @@ local function GetSchemeValue(Index)
     return Library.Scheme[Index]
 end
 
---// Basic Functions \\--
 local function WaitForEvent(Event, Timeout, Condition)
     local Bindable = Instance.new("BindableEvent")
     local Connection = Event:Once(function(...)
@@ -763,7 +732,6 @@ local function Round(Value, Rounding)
     return tonumber(string.format("%." .. Rounding .. "f", Value))
 end
 
---// Fuzzy Search \\--
 local function FuzzyScore(Text: string, Search: string): (boolean, number)
     if Search == "" then
         return true, 0
@@ -772,7 +740,6 @@ local function FuzzyScore(Text: string, Search: string): (boolean, number)
         return false, 0
     end
 
-    --// Fast path: literal substring match (also the best possible score) \\--
     local ExactIdx = Text:find(Search, 1, true)
     if ExactIdx then
         local PrevChar = ExactIdx > 1 and Text:sub(ExactIdx - 1, ExactIdx - 1) or ""
@@ -781,7 +748,6 @@ local function FuzzyScore(Text: string, Search: string): (boolean, number)
         return true, 1e5 - ExactIdx + (AtBoundary and 500 or 0) + (Search:len() * 5)
     end
 
-    --// Fallback: fuzzy, in-order, non-consecutive character matching \\--
     local TextLen, SearchLen = Text:len(), Search:len()
     if SearchLen > TextLen then
         return false, 0
@@ -810,10 +776,10 @@ local function FuzzyScore(Text: string, Search: string): (boolean, number)
     end
 
     if SearchIdx <= SearchLen then
-        return false, 0 --// Not every Search character was found, in order
+        return false, 0
     end
 
-    Score -= (LastMatchIdx - SearchLen) * 0.05 --// Slightly favour tighter matches
+    Score -= (LastMatchIdx - SearchLen) * 0.05
     return true, Score
 end
 
@@ -865,7 +831,6 @@ local function MatchesSearch(ElementInfo, Search: string, ForceMatch: boolean?):
         return true
     end
 
-    --// Optional: search inside Dropdown value lists, so e.g. searching a specific option name reveals the Dropdown that contains it \\--
     if typeof(ElementInfo.Values) == "table" then
         local Checked = 0
         for Key, Value in ElementInfo.Values do
@@ -941,10 +906,9 @@ local function CheckDepbox(Box, Search, ForceVisible: boolean?)
             ElementInfo.Holder.Visible = false
             continue
         elseif ElementInfo.SubButton then
-            --// Check if any of the Buttons Name matches with Search
+
             local Visible = false
 
-            --// Check if Search matches Element's Name and if Element is Visible
             if MatchesSearch(ElementInfo, Search, ForceVisible) and ElementInfo.Visible then
                 Visible = true
                 BestScore = math.max(BestScore, FuzzyMatchScore(ElementInfo.Text, Search))
@@ -965,7 +929,6 @@ local function CheckDepbox(Box, Search, ForceVisible: boolean?)
             continue
         end
 
-        --// Check if Search matches Element's Name and if Element is Visible
         if ElementInfo.Text and MatchesSearch(ElementInfo, Search, ForceVisible) and ElementInfo.Visible then
             ElementInfo.Holder.Visible = true
             VisibleElements += 1
@@ -1010,7 +973,6 @@ local function RestoreDepbox(Box)
     end
 end
 
---// Pop Out
 function SyncPopOutVisibility(Box: any)
     if not Box.PopOutFloat then
         return
@@ -1122,7 +1084,6 @@ local function GetPopOutBodyMaxHeight(Box: any, Reserved: number): number
     return ScreenMax
 end
 
---// Search
 local function ApplySearchToTab(Tab, Search)
     if not Tab then
         return false, 0
@@ -1131,7 +1092,6 @@ local function ApplySearchToTab(Tab, Search)
     local HasVisible = false
     local BestScore = 0
 
-    --// If the Tab itself matches Search (by name/description), don't filter out its contents -- pull everything in the Tab along with it \\--
     local TabMatches = TryFuzzyMatch(Tab.Name, Search) or TryFuzzyMatch(Tab.Description, Search)
     BestScore = math.max(BestScore, FuzzyMatchScore(Tab.Name, Search), FuzzyMatchScore(Tab.Description, Search))
 
@@ -1140,7 +1100,6 @@ local function ApplySearchToTab(Tab, Search)
             continue
         end
 
-        --// Optional: matching the Groupbox's own name/description reveals every element inside it, without needing each one to match too
         local GroupboxMatches = TabMatches or (TryFuzzyMatch(Groupbox.Name, Search) or TryFuzzyMatch(Groupbox.Description, Search))
         BestScore = math.max(BestScore, FuzzyMatchScore(Groupbox.Name, Search), FuzzyMatchScore(Groupbox.Description, Search))
 
@@ -1150,7 +1109,7 @@ local function ApplySearchToTab(Tab, Search)
                 ElementInfo.Holder.Visible = false
                 continue
             elseif ElementInfo.SubButton then
-                --// Check if any of the Buttons Name matches with Search
+
                 local Visible = false
                 if MatchesSearch(ElementInfo, Search, GroupboxMatches) and ElementInfo.Visible then
                     Visible = true
@@ -1174,7 +1133,6 @@ local function ApplySearchToTab(Tab, Search)
                 continue
             end
 
-            --// Check if Search matches Element's Name and if Element is Visible
             if ElementInfo.Text and MatchesSearch(ElementInfo, Search, GroupboxMatches) and ElementInfo.Visible then
                 ElementInfo.Holder.Visible = true
                 VisibleElements += 1
@@ -1196,7 +1154,6 @@ local function ApplySearchToTab(Tab, Search)
             end
         end
 
-        --// Update Groupbox Size and Visibility if found any element
         if VisibleElements > 0 then
             Groupbox:Resize()
             HasVisible = true
@@ -1213,7 +1170,6 @@ local function ApplySearchToTab(Tab, Search)
         for _, SubTab in Tabbox.Tabs do
             VisibleElements[SubTab] = 0
 
-            --// Optional: matching a Tabbox sub-tab's own name reveals every element inside it, without needing each one to match too
             local SubTabMatches = TabMatches or TryFuzzyMatch(SubTab.Name, Search)
             local SubScore = FuzzyMatchScore(SubTab.Name, Search)
             BestScore = math.max(BestScore, SubScore)
@@ -1223,7 +1179,7 @@ local function ApplySearchToTab(Tab, Search)
                     ElementInfo.Holder.Visible = false
                     continue
                 elseif ElementInfo.SubButton then
-                    --// Check if any of the Buttons Name matches with Search
+
                     local Visible = false
                     if MatchesSearch(ElementInfo, Search, SubTabMatches) and ElementInfo.Visible then
                         Visible = true
@@ -1251,7 +1207,6 @@ local function ApplySearchToTab(Tab, Search)
                     continue
                 end
 
-                --// Check if Search matches Element's Name and if Element is Visible
                 if ElementInfo.Text and MatchesSearch(ElementInfo, Search, SubTabMatches) and ElementInfo.Visible then
                     ElementInfo.Holder.Visible = true
                     VisibleElements[SubTab] += 1
@@ -1304,7 +1259,6 @@ local function ApplySearchToTab(Tab, Search)
             BestSubTab:Show()
         end
 
-        --// Update Tabbox Visibility if any visible
         Tabbox.BoxHolder.Visible = VisibleTabs > 0
         SyncPopOutVisibility(Tabbox)
     end
@@ -1593,7 +1547,6 @@ function Library:Validate(Table: { [string]: any }, Template: { [string]: any })
     return Table
 end
 
---// Creator Functions \\--
 local function FillInstance(Table: { [string]: any }, Instance: GuiObject)
     local ThemeProperties = Library.Registry[Instance] or {}
 
@@ -1723,7 +1676,6 @@ function Library:ApplyLucideIcon(ImageGui: any, Icon: any, Rotation: number?)
     ImageGui.ImageRectSize = Icon.ImageRectSize or ImageGui.ImageRectSize
 end
 
---// Main Instances \\-
 local function SafeParentUI(Instance: Instance, Parent: Instance | () -> Instance)
     local success, _error = pcall(function()
         if not Parent then
@@ -1800,7 +1752,6 @@ local ModalElement = New("TextButton", {
     Parent = ScreenGui,
 })
 
---// Floats and Overlays
 local Floats = New("Frame", {
     BackgroundTransparency = 1,
     Size = UDim2.fromScale(1, 1),
@@ -1820,7 +1771,6 @@ local Overlay = New("Frame", {
 Library.Floats = Floats
 Library.Overlay = Overlay
 
---// Cursor
 local Cursor
 local CursorCross
 local InnerCross = {}
@@ -1889,7 +1839,7 @@ do
 end
 
 local function RestoreMouseIcon()
-    pcall(function() 
+    pcall(function()
         RunService:UnbindFromRenderStep(Library.ShowCursorBinding)
         RunService.RenderStepped:Wait()
     end)
@@ -1898,7 +1848,6 @@ local function RestoreMouseIcon()
     if Cursor then Cursor.Visible = false end
 end
 
---// Notification \\--
 local NotificationArea
 local NotifyOrder = {}
 do
@@ -1918,7 +1867,6 @@ do
     )
 end
 
---// Icons \\--
 local CheckIcon, ArrowIcon, ResizeIcon, KeyIcon, MoveIcon, PopOutIcon, CloseIcon, SettingsIcon
 function Library:SetIconModule(module: IconModule)
     FetchIcons = true
@@ -1949,14 +1897,13 @@ do
                 game:HttpGet("https://raw.githubusercontent.com/notpoiu/lucide-roblox-direct/refs/heads/main/source.lua")
             ) :: () -> IconModule)()
         end)
-        
+
         if OnlineFetchIcons and OnlineIcons then
             Library:SetIconModule(OnlineIcons)
         end
     end
 end
 
---// Lib Functions \\--
 Library.Cursor = {}
 
 function Library.Cursor:ResetCross()
@@ -2010,43 +1957,36 @@ function Library.Cursor:ChangeIconSize(Size: UDim2)
     CursorCustomImage.Size = Size
 end
 
---// DEPRECATED
 function Library:ChangeCursorCrossColor(Color: Color3)
     warn("Obsidian:ChangeCursorCrossColor is deprecated, please use Obsidian.Cursor:ChangeCrossColor instead.")
     Library.Cursor:ChangeCrossColor(Color)
 end
 
---// DEPRECATED
 function Library:ResetCursorCross()
     warn("Obsidian:ResetCursorCross is deprecated, please use Obsidian.Cursor:ResetCross instead.")
     Library.Cursor:ResetCross()
 end
 
---// DEPRECATED
 function Library:ChangeCursorIcon(ImageId: string)
     warn("Obsidian:ChangeCursorIcon is deprecated, please use Obsidian.Cursor:ChangeIcon instead.")
     Library.Cursor:ChangeIcon(ImageId)
 end
 
---// DEPRECATED
 function Library:ChangeCursorIconColor(Color: Color3)
     warn("Obsidian:ChangeCursorIconColor is deprecated, please use Obsidian.Cursor:ChangeIconColor instead.")
     Library.Cursor:ChangeIconColor(Color)
 end
 
---// DEPRECATED
 function Library:ChangeCursorIconSize(Size: UDim2)
     warn("Obsidian:ChangeCursorIconSize is deprecated, please use Obsidian.Cursor:ChangeIconSize instead.")
     Library.Cursor:ChangeIconSize(Size)
 end
 
---// DEPRECATED
 function Library:ResetCursorIcon()
     warn("Obsidian:ResetCursorIcon is deprecated, please use Obsidian.Cursor:ResetIcon instead.")
     Library.Cursor:ResetIcon()
 end
 
---// Colors \\--
 function Library:GetBetterColor(Color: Color3, Add: number): Color3
     Add = Add * (Library.IsLightTheme and -4 or 2)
     return Color3.fromRGB(
@@ -2207,7 +2147,6 @@ function PositionDraggable(UI: GuiObject, StartPos: UDim2?)
     UI.Position = GetNonOverlappingPosition(UI, StartPos)
 end
 
---// Window Snapping \\--
 local function GetCoreGuiInset(): (Vector2, Vector2)
     local Success, TopLeft, BottomRight = pcall(function()
         return GuiService:GetGuiInset()
@@ -2265,7 +2204,7 @@ local function GetSnapGuideOffset(Name: string, SnappedValue: number, ElemDimens
         return SnappedValue + ElemDimension / 2
     end
 
-    return SnappedValue -- LeftEdge / TopEdge
+    return SnappedValue
 end
 
 function Library:MakeDraggable(
@@ -2576,7 +2515,6 @@ function Library:AddBlank(Frame: GuiObject, Size: UDim2)
     })
 end
 
---// Animations \\--
 local TransparencyCache = {}
 local ActiveTabTweens = setmetatable({}, { __mode = "k" })
 
@@ -2624,8 +2562,8 @@ function Library:PlayTabAnimation(Tab, Showing: boolean, OnComplete: (() -> ())?
         if SwipeFrom == "auto" and Library.PreviousTab then
             local CurrentOrder = Tab.Button.LayoutOrder
             local PreviousOrder = Library.PreviousTab.Button.LayoutOrder
-            if CurrentOrder and PreviousOrder then -- this may be unnecessary but oh well
-                StartPosition = CurrentOrder > PreviousOrder and StartingPositions.Top or StartingPositions.Bottom -- bigger order means its under the current button
+            if CurrentOrder and PreviousOrder then
+                StartPosition = CurrentOrder > PreviousOrder and StartingPositions.Top or StartingPositions.Bottom
             else
                 StartPosition = StartingPositions.Bottom
             end
@@ -2635,7 +2573,7 @@ function Library:PlayTabAnimation(Tab, Showing: boolean, OnComplete: (() -> ())?
             StartPosition = StartingPositions.Top
         elseif SwipeFrom == "right" then
             StartPosition = StartingPositions.Right
-        else -- bottom (Default)
+        else
             StartPosition = StartingPositions.Bottom
         end
 
@@ -2679,7 +2617,6 @@ function Library:PlayTabAnimation(Tab, Showing: boolean, OnComplete: (() -> ())?
     end
 end
 
---// Pop Out \\--
 function Library:MakeBoxPopOut(Box: any, Options: {
     Enabled: boolean?,
     Header: GuiObject?,
@@ -2726,7 +2663,6 @@ function Library:MakeBoxPopOut(Box: any, Options: {
     local DragChanged: RBXScriptConnection?
     local DragDidMove = false
 
-    --// UI Handler
     local function GetPopOutWidth(): number
         if typeof(Box.PopOutWidth) == "number" then
             return math.max(50, math.floor(Box.PopOutWidth + 0.5))
@@ -2959,7 +2895,7 @@ function Library:MakeBoxPopOut(Box: any, Options: {
             Placeholder:Destroy()
             Placeholder = nil
         end
-        
+
         PlaceholderHeader = nil
 
         if Float then
@@ -3007,7 +2943,6 @@ function Library:MakeBoxPopOut(Box: any, Options: {
         ApplyPopOutWidth()
     end
 
-    --// Drag Handler
     local function StopDrag()
         if DragState == "Idle" then
             return
@@ -3151,7 +3086,6 @@ function Library:MakeBoxPopOut(Box: any, Options: {
     end))
 end
 
---// Deprecated \\--
 function Library:MakeOutline(Frame: GuiObject, Corner: number?, ZIndex: number?)
     warn("Obsidian:MakeOutline is deprecated, please use Obsidian:AddOutline instead.")
     local Holder = New("Frame", {
@@ -3611,7 +3545,6 @@ function Library:AddDraggableImageButton(...)
     return DraggableImageButton
 end
 
---// Watermark - Deprecated \\--
 do
     local WatermarkLabel = Library:AddDraggableLabel("")
     WatermarkLabel:SetVisible(false)
@@ -3627,7 +3560,6 @@ do
     end
 end
 
---// Context Menu \\--
 local CurrentMenu
 function Library:AddContextMenu(
     Holder: GuiObject,
@@ -3636,7 +3568,7 @@ function Library:AddContextMenu(
     List: number?,
     ActiveCallback: (Active: boolean) -> ()?,
     IgnoreCornerRadius: boolean?,
-    SpecificCornersOnly: ("top" | "bottom" | "no_left" | "no_top_left")?, -- stupid way of doing this
+    SpecificCornersOnly: ("top" | "bottom" | "no_left" | "no_top_left")?,
     AnimationType: ("Dropdown" | "KeyPicker" | "none")?
 )
     local Menu
@@ -3988,7 +3920,6 @@ Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input: InputObje
     end
 end))
 
---// Tooltip \\--
 local TooltipLabel = New("TextLabel", {
     BackgroundColor3 = "BackgroundColor",
     TextSize = 14,
@@ -4183,9 +4114,9 @@ do
             Connections = {},
 
             Text = Info.Text,
-            Value = Info.Default, -- Key
-            Modifiers = Info.DefaultModifiers, -- Modifiers
-            DisplayValue = Info.Default, -- Picker Text
+            Value = Info.Default,
+            Modifiers = Info.DefaultModifiers,
+            DisplayValue = Info.Default,
 
             Blacklisted = Info.Blacklisted,
             BlacklistedModifiers = Info.BlacklistedModifiers,
@@ -4227,7 +4158,6 @@ do
         local Picking = false
         local IsForButton = ParentObj.Type == "Button" or ParentObj.Type == "SubButton"
 
-        -- Special Keys
         local SpecialKeys = {
             ["MB1"] = Enum.UserInputType.MouseButton1,
             ["MB2"] = Enum.UserInputType.MouseButton2,
@@ -4240,7 +4170,6 @@ do
             [Enum.UserInputType.MouseButton3] = "MB3",
         }
 
-        -- Modifiers
         local Modifiers = {
             ["LAlt"] = Enum.KeyCode.LeftAlt,
             ["RAlt"] = Enum.KeyCode.RightAlt,
@@ -4618,7 +4547,7 @@ do
                 Label.Position = (not IsPress and not Normal) and UDim2.fromOffset(22, 0) or UDim2.fromOffset(0, 0)
             end
 
-            KeyPicker.DoClick = function(...) end --// make luau lsp shut up
+            KeyPicker.DoClick = function(...) end
             table.insert(KeyPicker.Connections, Holder.MouseButton1Click:Connect(function()
                 if KeyPicker.Mode == "Press" then
                     KeyPicker:DoClick()
@@ -5139,7 +5068,6 @@ do
                 Picker.Size = IsForButton and UDim2.new(0, 29, 1, 0) or UDim2.fromOffset(29, 18)
             end
 
-            -- Wait for any input --
             local ActiveModifiers = {}
             local CurrentInput = nil
 
@@ -5183,7 +5111,6 @@ do
                 return true
             end
 
-            -- Wait for the first valid InputBegan --
             while true do
                 local InputObj = UserInputService.InputBegan:Wait()
                 if UserInputService:GetFocusedTextBox() ~= nil then
@@ -5197,13 +5124,11 @@ do
                 end
             end
 
-            -- If it's a modifier key, we wait for either its release or another input --
             while IsModifierInput(CurrentInput) do
                 if CurrentInput.KeyCode == Enum.KeyCode.Escape then
                     break
                 end
 
-                -- Display the current state including the current modifier key --
                 local ModName = ModifiersInput[CurrentInput.KeyCode]
                 if ModName then
                     local text = if #ActiveModifiers > 0 then table.concat(ActiveModifiers, " + ") .. " + " .. ModName .. " + ..." else ModName .. " + ..."
@@ -5244,9 +5169,9 @@ do
                 end
 
                 if Released then
-                    break -- Use modifier key as bind
+                    break
                 elseif NextInput then
-                    -- Add another modifier or continue to normal key
+
                     local OldModName = ModifiersInput[CurrentInput.KeyCode]
                     if OldModName and not table.find(ActiveModifiers, OldModName) then
                         ActiveModifiers[#ActiveModifiers + 1] = OldModName
@@ -5494,7 +5419,6 @@ do
             })
         )
 
-        --// Color Menu \\--
         local MapSize = Library.IsMobile and 140 or 200
         local BarWidth = 16
         local MenuWidth = MapSize + BarWidth + 6 + 12
@@ -5537,7 +5461,6 @@ do
         ColorMenu.List.Padding = UDim.new(0, 0)
         ColorPicker.ColorMenu = ColorMenu
 
-        --// Content Holder \\--
         local ContentHolder = New("Frame", {
             AutomaticSize = Enum.AutomaticSize.Y,
             BackgroundTransparency = 1,
@@ -5556,7 +5479,6 @@ do
             Parent = ContentHolder,
         })
 
-        --// Footer \\--
         local FooterHeight = Library.IsMobile and 30 or 22
 
         local FooterBackground = New("Frame", {
@@ -5634,7 +5556,6 @@ do
             Parent = ColorHolder,
         })
 
-        --// Sat Map
         local SatVipMap = New("ImageButton", {
             BackgroundColor3 = ColorPicker.Value,
             Image = CustomImageManager.GetAsset("SaturationMap"),
@@ -5657,7 +5578,6 @@ do
             Parent = SatVibCursor,
         })
 
-        --// Hue
         local HueSelector = New("TextButton", {
             Size = UDim2.fromOffset(BarWidth, MapSize),
             Text = "",
@@ -5679,7 +5599,6 @@ do
             Parent = HueSelector,
         })
 
-        --// Alpha
         local TransparencySelector, TransparencyColor, TransparencyCursor
         if Info.Transparency then
             TransparencySelector = New("ImageButton", {
@@ -5715,7 +5634,6 @@ do
             })
         end
 
-        --// Resizing \\--
         local ResizeGrabber
         if Info.Resizable then
             local BaseMapSize = 200
@@ -5887,7 +5805,6 @@ do
             })
         )
 
-        --// Context Menu \\--
         local ContextMenu
         ContextMenu = Library:AddContextMenu(Holder, UDim2.fromOffset(93, 0), function()
             return { Holder.AbsoluteSize.X + 1.5, 0.5 }
@@ -5943,7 +5860,7 @@ do
                 Library.CopiedColor = { ColorPicker.Value, ColorPicker.Transparency }
             end)
 
-            ColorPicker.SetValueRGB = function(...) end --// make luau lsp shut up
+            ColorPicker.SetValueRGB = function(...) end
             CreateButton("Paste color", function()
                 if not Library.CopiedColor then
                     return
@@ -5967,7 +5884,6 @@ do
             end
         end
 
-        --// Copy/Paste Buttons \\--
         local ActionHolder = New("Frame", {
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 0, 20),
@@ -6083,7 +5999,6 @@ do
             end)
         end))
 
-        --// End \\--
         function ColorPicker:SetHSVFromRGB(Color)
             ColorPicker.Hue, ColorPicker.Sat, ColorPicker.Vib = Color:ToHSV()
         end
@@ -8754,8 +8669,6 @@ do
             local DisabledValues = Dropdown.DisabledValues
             local IsDictionary = not IsSequentialArray(Values)
 
-            --// Fuzzy-match dropdown values the same way the sidebar search
-            --// does, so e.g. "clr" can find "Clear Inventory" in a list \\--
             local SearchQuery = SearchBox and NormalizeSearch(SearchBox.Text:lower()) or ""
             local IsSearching = SearchQuery ~= ""
 
@@ -8794,7 +8707,7 @@ do
             end
 
             if IsSearching then
-                --// Best matches first; ties fall back to original order \\--
+
                 table.sort(Pending, function(A, B)
                     if A.MatchScore ~= B.MatchScore then
                         return A.MatchScore > B.MatchScore
@@ -11069,7 +10982,6 @@ function Library:CreateWindow(WindowInfo)
 
     local TabButtonsStyle = WindowInfo.TabButtonsStyle
 
-    --// Old Naming \\--
     if WindowInfo.Compact ~= nil then
         WindowInfo.SidebarCompacted = WindowInfo.Compact
     end
@@ -11469,7 +11381,6 @@ function Library:CreateWindow(WindowInfo)
             MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset / 2, 0.5, -MainFrame.Size.Y.Offset / 2)
         end
 
-        --// Top Bar \\-
         TopBar = New("Frame", {
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 0, 48),
@@ -11477,7 +11388,6 @@ function Library:CreateWindow(WindowInfo)
         })
         Library:MakeDraggable(MainFrame, TopBar, false, true, WindowSnapConfig)
 
-        --// Title \\--
         TitleHolder = New("Frame", {
             BackgroundTransparency = 1,
             Size = UDim2.new(0, InitialLeftWidth, 1, 0),
@@ -11534,7 +11444,6 @@ function Library:CreateWindow(WindowInfo)
         end
         RefreshWindowTitleSize()
 
-        --// Top Right Bar \\--
         RightWrapper = New("Frame", {
             AnchorPoint = Vector2.new(1, 0.5),
             BackgroundTransparency = 1,
@@ -11669,7 +11578,6 @@ function Library:CreateWindow(WindowInfo)
             Library:ApplyLucideIcon(MoveIconImage, MoveIcon)
         end
 
-        --// Bottom Bar \\--
         local BottomClip = New("Frame", {
             AnchorPoint = Vector2.new(0, 1),
             BackgroundTransparency = 1,
@@ -11713,7 +11621,6 @@ function Library:CreateWindow(WindowInfo)
             Parent = BottomBackground,
         })
 
-        --// Footer \\-
         FooterLabel = New("TextLabel", {
             BackgroundTransparency = 1,
             Size = UDim2.fromScale(1, 1),
@@ -11723,7 +11630,6 @@ function Library:CreateWindow(WindowInfo)
             Parent = BottomBar,
         })
 
-        --// Resize Button \\--
         if WindowInfo.Resizable then
             ResizeButton = New("TextButton", {
                 AnchorPoint = Vector2.new(1, 0),
@@ -11753,7 +11659,6 @@ function Library:CreateWindow(WindowInfo)
             Library:ApplyLucideIcon(WindowResizeIcon, ResizeIcon)
         end
 
-        --// Tabs \\--
         Tabs = New("ScrollingFrame", {
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             BackgroundColor3 = "BackgroundColor",
@@ -11776,7 +11681,6 @@ function Library:CreateWindow(WindowInfo)
             Parent = Tabs,
         })
 
-        --// Container \\--
         Container = New("Frame", {
             AnchorPoint = Vector2.new(1, 0),
             BackgroundColor3 = function()
@@ -11799,7 +11703,6 @@ function Library:CreateWindow(WindowInfo)
         Library.WindowContainer = Container
     end
 
-    --// Window Table \\--
     local Window = {}
     local Fading = false
 
@@ -11959,10 +11862,10 @@ function Library:CreateWindow(WindowInfo)
             if not Menu.Active then
                 local HolderActive = false
                 for _, Other in Library.ContextMenus do
-                    if Other == Menu then 
+                    if Other == Menu then
                         continue
                     end
-   
+
                     if Other.Active and Other.Holder == Menu.Holder then
                         HolderActive = true
                         break
@@ -12079,7 +11982,7 @@ function Library:CreateWindow(WindowInfo)
         if WindowInfo.EnableCompacting then
             ApplyCompact()
         end
-    
+
         RefreshWindowTitleSize()
         if not IsCompact then
             LastExpandedWidth = Width
@@ -12210,7 +12113,6 @@ function Library:CreateWindow(WindowInfo)
                 Icon = TabIcon,
             })
 
-            --// Tab Container \\--
             TabContainer = New("Frame", {
                 BackgroundTransparency = 1,
                 Position = UDim2.fromScale(0, 0),
@@ -12288,7 +12190,6 @@ function Library:CreateWindow(WindowInfo)
             end
         end
 
-        --// Tab Table \\--
         local Tab = {
             Name = Name,
             Description = Description,
@@ -12319,7 +12220,6 @@ function Library:CreateWindow(WindowInfo)
             DependencyGroupboxes = {},
         }
 
-        --// Warning Box \\--
         local WarningBoxHolder = New("Frame", {
             AutomaticSize = Enum.AutomaticSize.Y,
             BackgroundTransparency = 1,
@@ -12431,7 +12331,6 @@ function Library:CreateWindow(WindowInfo)
             })
         end
 
-        --// Tab Handlers \\--
         function Tab:UpdateWarningBox(Info)
             if typeof(Info.IsNormal) == "boolean" then
                 Tab.WarningBox.IsNormal = Info.IsNormal
@@ -12800,7 +12699,6 @@ function Library:CreateWindow(WindowInfo)
                     end
                 end
 
-                --// Execution \\--
                 if not Tabbox.ActiveTab then
                     Tab:Show()
                 end
@@ -12875,12 +12773,10 @@ function Library:CreateWindow(WindowInfo)
 
         Tab.AddTabbox = AddTabbox
 
-        --// Deprecated - Use Tab:AddTabbox instead.
         function Tab:AddLeftTabbox(Name)
             return Tab:AddTabbox({ Side = 1, Name = Name })
         end
 
-        --// Deprecated - Use Tab:AddTabbox instead.
         function Tab:AddRightTabbox(Name)
             return Tab:AddTabbox({ Side = 2, Name = Name })
         end
@@ -13305,12 +13201,10 @@ function Library:CreateWindow(WindowInfo)
             return Groupbox
         end
 
-        --// Deprecated - Use Tab:AddGroupbox instead.
         function Tab:AddLeftGroupbox(Name, IconName, Visible, Collapsed, DisableCollapsing)
             return Tab:AddGroupbox({ Side = 1, Name = Name, IconName = IconName, Visible = Visible, Collapsed = Collapsed, DisableCollapsing = DisableCollapsing })
         end
 
-        --// Deprecated - Use Tab:AddGroupbox instead.
         function Tab:AddRightGroupbox(Name, IconName, Visible, Collapsed, DisableCollapsing)
             return Tab:AddGroupbox({ Side = 2, Name = Name, IconName = IconName, Visible = Visible, Collapsed = Collapsed, DisableCollapsing = DisableCollapsing })
         end
@@ -13476,7 +13370,6 @@ function Library:CreateWindow(WindowInfo)
             Library.Tabs[Name] = nil
         end
 
-        --// Execution \\--
         if typeof(Tooltip) == "string" then
             Tab.TooltipTable = Library:AddTooltip(Tooltip, nil, TabButton)
         end
@@ -13606,7 +13499,6 @@ function Library:CreateWindow(WindowInfo)
                 Icon = TabIcon,
             })
 
-            --// Tab Container \\--
             TabContainer = New("ScrollingFrame", {
                 AutomaticCanvasSize = Enum.AutomaticSize.Y,
                 BackgroundTransparency = 1,
@@ -13630,7 +13522,6 @@ function Library:CreateWindow(WindowInfo)
             })
         end
 
-        --// Tab Table \\--
         local Tab = {
             Description = Description,
             IsKeyTab = true,
@@ -13876,7 +13767,6 @@ function Library:CreateWindow(WindowInfo)
             end
         end
 
-        --// Execution \\--
         if typeof(Tooltip) == "string" then
             Tab.TooltipTable = Library:AddTooltip(Tooltip, nil, TabButton)
         end
@@ -14628,7 +14518,6 @@ function Library:CreateWindow(WindowInfo)
         end
     end
 
-    --// Execution \\--
     Library:GiveSignal(SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
         Library:UpdateSearch(SearchBox.Text)
     end))
@@ -14639,14 +14528,13 @@ function Library:CreateWindow(WindowInfo)
         end
 
         if Input.KeyCode == Enum.KeyCode.Escape then
-            -- Releasing focus from a text input takes priority and never toggles the window --
+
             local FocusedBox = UserInputService:GetFocusedTextBox()
             if FocusedBox then
                 FocusedBox:ReleaseFocus()
                 return
             end
 
-            -- Dismiss the topmost dialog before closing any open menu --
             if Library.ActiveDialog and Library.ActiveDialog.OutsideClickDismiss ~= false then
                 Library.ActiveDialog:Dismiss()
                 return
@@ -14710,7 +14598,6 @@ function Library:CreateLoading(LoadingInfo)
         SidebarWidth = LoadingInfo.SidebarWidth,
     }
 
-    --// ScreenGui \\--
     local ScreenGui = New("ScreenGui", {
         Name = "ObsidianLoading",
         DisplayOrder = 999,
@@ -14730,7 +14617,6 @@ function Library:CreateLoading(LoadingInfo)
         end)
     end)
 
-    --// Main Frame \\--
     local MainFrame = New("TextButton", {
         Name = "Main",
         AnchorPoint = Vector2.new(0.5, 0.5),
@@ -14754,7 +14640,6 @@ function Library:CreateLoading(LoadingInfo)
     table.insert(Library.Scales, MainScale)
     Library.ScalesOffset[MainScale] = Library.IsMobile and 0.2 or 0
 
-    --// Layout Containers \\--
     local Container = New("Frame", {
         Name = "Content",
         BackgroundTransparency = 1,
@@ -14786,7 +14671,6 @@ function Library:CreateLoading(LoadingInfo)
         Parent = SideBar,
     })
 
-    --// Top Bar \\--
     local TopBar = New("Frame", {
         Name = "TopBar",
         BackgroundTransparency = 1,
@@ -14855,7 +14739,6 @@ function Library:CreateLoading(LoadingInfo)
         Size = UDim2.new(1, 0, 0, 1),
     })
 
-    --// Loading Content Elements \\--
     local InnerContent = New("Frame", {
         Name = "InnerContent",
         BackgroundTransparency = 1,
@@ -14924,7 +14807,6 @@ function Library:CreateLoading(LoadingInfo)
         Parent = InnerContent,
     })
 
-    --// Progress Bar \\--
     local SliderBar = New("Frame", {
         BackgroundColor3 = "MainColor",
         Size = UDim2.new(0.7, 0, 0, 15),
@@ -14956,7 +14838,6 @@ function Library:CreateLoading(LoadingInfo)
         Parent = ProgressLabel,
     })
 
-    --// Sidebar Object \\--
     local SidebarScrolling = New("ScrollingFrame", {
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
@@ -15005,7 +14886,6 @@ function Library:CreateLoading(LoadingInfo)
     setmetatable(SidebarObject, BaseGroupbox)
     Loading.Sidebar = SidebarObject
 
-    --// Error Frame \\--
     local ErrorFrame = New("Frame", {
         Name = "Error",
         BackgroundTransparency = 1,
@@ -15102,15 +14982,14 @@ function Library:CreateLoading(LoadingInfo)
         end
     end
 
-    --// Content Page \\--
     function Loading:RecalculateLoadingHeight()
         if not Loading.AutoResizeHeight then
             return
         end
 
         local RequiredHeight =
-              49 -- TopBar
-            + 48 -- Padding
+              49
+            + 48
             + InnerContent.UIListLayout.AbsoluteContentSize.Y
 
         Loading.WindowHeight = math.max(Loading.BaseWindowHeight, RequiredHeight)
@@ -15177,7 +15056,6 @@ function Library:CreateLoading(LoadingInfo)
         Loading:SetCurrentStep(Loading.CurrentStep)
     end
 
-    --// Size \\--
     function Loading:SetWindowHeight(Height)
         Loading.WindowHeight = Height
         Loading:UpdateLayout()
@@ -15198,13 +15076,11 @@ function Library:CreateLoading(LoadingInfo)
         Loading:UpdateLayout()
     end
 
-    --// Sidebar \\--
     function Loading:ShowSidebarPage(Bool)
         Loading.ShowSidebar = Bool
         Loading:UpdateLayout()
     end
 
-    --// Error Page \\--
     function Loading:ShowErrorPage(Enabled)
         Loading.IsError = Enabled
         InnerContent.Visible = not Enabled
@@ -15225,15 +15101,15 @@ function Library:CreateLoading(LoadingInfo)
 
         local HasButtons = ErrorButtonsHolder.Visible
         local RequiredHeight =
-              49                        -- TopBar
-            + 15                        -- Padding Top
-            + 18                        -- Title Height
-            + 6                         -- Padding between Title and Label
-            + ErrorY                    -- Label Height
-            + 15                        -- Padding between Label and Buttons
-            + (HasButtons and 48 or 0)  -- Buttons Area
+              49
+            + 15
+            + 18
+            + 6
+            + ErrorY
+            + 15
+            + (HasButtons and 48 or 0)
 
-        Loading.WindowErrorHeight = RequiredHeight -- math.max(Loading.WindowHeight, RequiredHeight)
+        Loading.WindowErrorHeight = RequiredHeight
     end
 
     function Loading:SetErrorMessage(Text)
@@ -15346,7 +15222,6 @@ function Library:CreateLoading(LoadingInfo)
         Loading:UpdateLayout()
     end
 
-    --// Destroy/Continue \\--
     function Loading:Destroy()
         if RotationTween then
             StopTween(RotationTween, true)
@@ -15406,10 +15281,887 @@ Library:GiveSignal(Players.PlayerRemoving:Connect(OnPlayerChange))
 Library:GiveSignal(Teams.ChildAdded:Connect(OnTeamChange))
 Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
 
+function Library:AddESPManager(Window, Info)
+    Info = Info or {}
+
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Prefix = Info.Prefix or "Esp"
+
+    local Settings = {
+        Enabled = false,
+
+        Box = false,
+        BoxGradient = false,
+        BoxColor = Color3.fromRGB(255, 80, 180),
+
+        Glow = false,
+        GlowGradient = false,
+        GlowColor = Color3.fromRGB(255, 80, 180),
+        GlowTransparency = 0.4,
+
+        HealthBar = false,
+        HealthBarGradient = false,
+
+        HealthText = false,
+        HealthTextGradient = false,
+
+        Name = false,
+        DisplayName = false,
+        NameGradient = false,
+
+        Avatar = false,
+
+        Weapon = false,
+        WeaponImage = false,
+        WeaponGradient = false,
+
+        Backpack = false,
+        BackpackGradient = false,
+        MaxBackpackItems = 6,
+
+        Distance = false,
+        DistanceGradient = false,
+
+        GradientColor1 = Color3.fromRGB(255, 255, 255),
+        GradientColor2 = Color3.fromRGB(255, 80, 180),
+        GradientAnimation = false,
+        GradientAnimationSpeed = 4,
+
+        UpdateRate = 0.2,
+        RetryUnknown = 2,
+        Fallback = "rbxassetid://93909275221626",
+    }
+
+    local Hidden = {}
+    local Custom = Info.Settings or Info.settings or Info.Values or Info.values or {}
+
+    for Key, Entry in Custom do
+        if typeof(Entry) == "table" and Entry.Value ~= nil or typeof(Entry) == "table" and Entry.Visible ~= nil then
+            if Entry.Visible ~= nil then
+                Hidden[Key] = Entry.Visible
+            end
+            Entry = Entry.Value
+        end
+        if Settings[Key] ~= nil and Entry ~= nil and typeof(Entry) ~= "table" then
+            Settings[Key] = Entry
+        end
+    end
+
+    local Angle = 0
+    local BaseRotation = { 0, 0, 90, 90, 0, 0, 0, 0, 0 }
+
+    if getgenv().BestESP_Cleanup then
+        pcall(getgenv().BestESP_Cleanup)
+    end
+    if getgenv().WeaponESP_Cleanup then
+        pcall(getgenv().WeaponESP_Cleanup)
+    end
+
+    getgenv().ESPSettings = Settings
+
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "BoxESP"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.Parent = gethui and gethui() or game:GetService("CoreGui")
+
+    local ESPFolder = Instance.new("Folder")
+    ESPFolder.Parent = ScreenGui
+
+    local Objects = {}
+    local Connections = {}
+
+    local IgnoredAttributes = {
+        Description = true,
+        ImageId = true,
+        RarityName = true,
+        DoNotReplicateChildren = true
+    }
+
+    local CategoryWords = {
+        melee = true,
+        gun = true,
+        throwable = true,
+        consumable = true,
+        misc = true,
+        tool = true
+    }
+
+    local ByName = {}
+    local MeshOwners = {}
+    local Indexed = false
+    local ItemCache = setmetatable({}, { __mode = "k" })
+    local SequenceCache = { First = nil, Second = nil, Value = nil }
+
+    local function set(instance, property, value)
+        if instance[property] ~= value then
+            instance[property] = value
+        end
+    end
+
+    local function getSequence()
+        if SequenceCache.First ~= Settings.GradientColor1 or SequenceCache.Second ~= Settings.GradientColor2 or not SequenceCache.Value then
+            SequenceCache.First = Settings.GradientColor1
+            SequenceCache.Second = Settings.GradientColor2
+            SequenceCache.Value = ColorSequence.new(Settings.GradientColor1, Settings.GradientColor2)
+        end
+        return SequenceCache.Value
+    end
+
+    local function collectMeshIds(root)
+        local ids = {}
+        for _, descendant in ipairs(root:GetDescendants()) do
+            if descendant:IsA("MeshPart") or descendant:IsA("SpecialMesh") then
+                local meshId = descendant.MeshId
+                if meshId and meshId ~= "" then
+                    ids[meshId] = true
+                end
+            end
+        end
+        return ids
+    end
+
+    local function buildIndex()
+        local items = ReplicatedStorage:FindFirstChild("Items")
+        if not items then
+            return
+        end
+        for _, item in ipairs(items:GetDescendants()) do
+            if item:IsA("Tool") then
+                if not ByName[item.Name] then
+                    ByName[item.Name] = item
+                end
+                for meshId in pairs(collectMeshIds(item)) do
+                    MeshOwners[meshId] = MeshOwners[meshId] or {}
+                    table.insert(MeshOwners[meshId], item)
+                end
+            end
+        end
+        Indexed = next(ByName) ~= nil
+    end
+
+    local function matchByMesh(meshIds)
+        local scores = {}
+        local bestTemplate = nil
+        local bestScore = 0
+        for meshId in pairs(meshIds) do
+            local owners = MeshOwners[meshId]
+            if owners then
+                for _, owner in ipairs(owners) do
+                    scores[owner] = (scores[owner] or 0) + 1 / #owners
+                    if scores[owner] > bestScore then
+                        bestScore = scores[owner]
+                        bestTemplate = owner
+                    end
+                end
+            end
+        end
+        if bestScore >= 0.5 then
+            return bestTemplate
+        end
+        return nil
+    end
+
+    local function isNumeric(text)
+        return tonumber(text) ~= nil
+    end
+
+    local function isPlayerName(text)
+        local lowered = text:lower()
+        for _, player in ipairs(Players:GetPlayers()) do
+            if lowered == player.Name:lower() or lowered == player.DisplayName:lower() then
+                return true
+            end
+        end
+        return false
+    end
+
+    local function isUsableName(value)
+        return type(value) == "string"
+            and value ~= ""
+            and #value < 40
+            and not value:find("rbxasset")
+            and not isNumeric(value)
+            and not isPlayerName(value)
+    end
+
+    local function prettify(text)
+        local spaced = text:gsub("_", " ")
+        return (spaced:gsub("(%a)([%w]*)", function(first, rest)
+            return first:upper() .. rest
+        end))
+    end
+
+    local function resolveItem(tool)
+        if not Indexed then
+            buildIndex()
+        end
+
+        local meshIds = collectMeshIds(tool)
+        local template = ByName[tool.Name] or matchByMesh(meshIds)
+        if template then
+            local name = template:GetAttribute("DisplayName")
+            if not isUsableName(name) then
+                name = template.Name
+            end
+            local image = template:GetAttribute("ImageId")
+            if type(image) ~= "string" or image == "" then
+                image = Settings.Fallback
+            end
+            return name, image
+        end
+
+        local hasMesh = next(meshIds) ~= nil
+        local isMelee = tool:GetAttribute("knockback_force") ~= nil or tool:GetAttribute("cone_angle") ~= nil
+        local fallbackName = nil
+        for key, value in pairs(tool:GetAttributes()) do
+            if type(value) == "string" and not IgnoredAttributes[key] then
+                if value == "melee" then
+                    isMelee = true
+                elseif not CategoryWords[value] and isUsableName(value) then
+                    fallbackName = fallbackName or value
+                end
+            end
+        end
+
+        if isMelee and not hasMesh then
+            return "Fists", Settings.Fallback
+        end
+        if fallbackName then
+            return prettify(fallbackName), Settings.Fallback
+        end
+        return "Item", Settings.Fallback
+    end
+
+    local function getResolved(tool, now)
+        local cached = ItemCache[tool]
+        if cached and (cached.Name ~= "Item" or now < cached.Retry) then
+            return cached.Name, cached.Image
+        end
+        local name, image = resolveItem(tool)
+        ItemCache[tool] = { Name = name, Image = image, Retry = now + Settings.RetryUnknown }
+        return name, image
+    end
+
+    local function createText(parent, name, font, size, height)
+        local label = Instance.new("TextLabel")
+        label.Name = name
+        label.BackgroundTransparency = 1
+        label.Size = UDim2.new(1, 0, 0, height)
+        label.Font = font
+        label.TextSize = size
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.TextXAlignment = Enum.TextXAlignment.Center
+        label.Parent = parent
+
+        local gradient = Instance.new("UIGradient")
+        gradient.Name = name .. "Gradient"
+        gradient.Enabled = false
+        gradient.Parent = label
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Thickness = 1
+        stroke.Color = Color3.fromRGB(0, 0, 0)
+        stroke.Parent = label
+
+        return label, gradient
+    end
+
+    local function createESP(player)
+        local box = Instance.new("Frame")
+        box.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        box.BackgroundTransparency = 1
+        box.BorderSizePixel = 0
+        box.Visible = false
+        box.Parent = ESPFolder
+
+        local glow = Instance.new("ImageLabel")
+        glow.Name = "Glow"
+        glow.BackgroundTransparency = 1
+        glow.Position = UDim2.new(0, -15, 0, -15)
+        glow.Size = UDim2.new(1, 30, 1, 30)
+        glow.Image = "rbxassetid://5028857084"
+        glow.ScaleType = Enum.ScaleType.Slice
+        glow.SliceCenter = Rect.new(24, 24, 276, 276)
+        glow.ImageColor3 = Color3.fromRGB(255, 255, 255)
+        glow.ImageTransparency = Settings.GlowTransparency
+        glow.ZIndex = 0
+        glow.Parent = box
+
+        local glowGradient = Instance.new("UIGradient")
+        glowGradient.Name = "GlowGradient"
+        glowGradient.Enabled = false
+        glowGradient.Parent = glow
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Name = "BoxStroke"
+        stroke.Color = Color3.fromRGB(255, 255, 255)
+        stroke.Thickness = 1
+        stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        stroke.Parent = box
+
+        local strokeGradient = Instance.new("UIGradient")
+        strokeGradient.Name = "StrokeGradient"
+        strokeGradient.Enabled = false
+        strokeGradient.Parent = stroke
+
+        local fill = Instance.new("Frame")
+        fill.Name = "Fill"
+        fill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        fill.BackgroundTransparency = 0.65
+        fill.BorderSizePixel = 0
+        fill.Size = UDim2.fromScale(1, 1)
+        fill.Position = UDim2.fromScale(0, 0)
+        fill.Parent = box
+
+        local fillGradient = Instance.new("UIGradient")
+        fillGradient.Name = "FillGradient"
+        fillGradient.Rotation = 90
+        fillGradient.Enabled = false
+        fillGradient.Parent = fill
+
+        local healthBarBg = Instance.new("Frame")
+        healthBarBg.Name = "HealthBarBg"
+        healthBarBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        healthBarBg.BackgroundTransparency = 0.4
+        healthBarBg.BorderSizePixel = 0
+        healthBarBg.Size = UDim2.new(0, 2, 1, 0)
+        healthBarBg.Position = UDim2.new(0, -5, 0, 0)
+        healthBarBg.Parent = box
+
+        local healthBar = Instance.new("Frame")
+        healthBar.Name = "HealthBar"
+        healthBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        healthBar.BorderSizePixel = 0
+        healthBar.Size = UDim2.fromScale(1, 1)
+        healthBar.Position = UDim2.fromScale(0, 0)
+        healthBar.Parent = healthBarBg
+
+        local healthBarGradient = Instance.new("UIGradient")
+        healthBarGradient.Name = "HealthBarGradient"
+        healthBarGradient.Rotation = 90
+        healthBarGradient.Enabled = false
+        healthBarGradient.Parent = healthBar
+
+        local healthText, healthTextGradient = createText(box, "HealthText", Enum.Font.SourceSansBold, 11, 12)
+        healthText.Size = UDim2.new(0, 40, 0, 12)
+        healthText.Position = UDim2.new(0, -47, 0, -2)
+        healthText.TextXAlignment = Enum.TextXAlignment.Right
+
+        local nameText, nameTextGradient = createText(box, "NameText", Enum.Font.SourceSansBold, 12, 14)
+        nameText.Position = UDim2.new(0, 0, 0, -16)
+
+        local avatarImage = Instance.new("ImageLabel")
+        avatarImage.Name = "AvatarImage"
+        avatarImage.BackgroundTransparency = 1
+        avatarImage.Size = UDim2.new(0, 25, 0, 25)
+        avatarImage.Position = UDim2.new(0.5, -12.5, 0, -43)
+        avatarImage.BorderSizePixel = 0
+        avatarImage.Parent = box
+
+        local weaponRow = Instance.new("Frame")
+        weaponRow.Name = "WeaponRow"
+        weaponRow.BackgroundTransparency = 1
+        weaponRow.Size = UDim2.new(1, 0, 0, 18)
+        weaponRow.Visible = false
+        weaponRow.Parent = box
+
+        local weaponLayout = Instance.new("UIListLayout")
+        weaponLayout.FillDirection = Enum.FillDirection.Horizontal
+        weaponLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        weaponLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        weaponLayout.Padding = UDim.new(0, 3)
+        weaponLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        weaponLayout.Parent = weaponRow
+
+        local weaponIcon = Instance.new("ImageLabel")
+        weaponIcon.Name = "WeaponIcon"
+        weaponIcon.BackgroundTransparency = 1
+        weaponIcon.Size = UDim2.fromOffset(18, 18)
+        weaponIcon.ScaleType = Enum.ScaleType.Fit
+        weaponIcon.LayoutOrder = 1
+        weaponIcon.Parent = weaponRow
+
+        local weaponText, weaponTextGradient = createText(weaponRow, "WeaponText", Enum.Font.SourceSansBold, 11, 14)
+        weaponText.AutomaticSize = Enum.AutomaticSize.X
+        weaponText.Size = UDim2.fromOffset(0, 14)
+        weaponText.LayoutOrder = 2
+
+        local distanceText, distanceTextGradient = createText(box, "DistanceText", Enum.Font.SourceSansBold, 11, 14)
+
+        local backpackText, backpackTextGradient = createText(box, "BackpackText", Enum.Font.SourceSans, 10, 14)
+
+        task.spawn(function()
+            local ok, content, isReady = pcall(function()
+                return Players:GetUserThumbnailAsync(
+                    player.UserId,
+                    Enum.ThumbnailType.HeadShot,
+                    Enum.ThumbnailSize.Size100x100
+                )
+            end)
+            if ok and isReady and avatarImage.Parent then
+                avatarImage.Image = content
+            end
+        end)
+
+        return {
+            Player = player,
+            Box = box,
+            Glow = glow,
+            GlowGradient = glowGradient,
+            Stroke = stroke,
+            StrokeGradient = strokeGradient,
+            Fill = fill,
+            FillGradient = fillGradient,
+            HealthBarBg = healthBarBg,
+            HealthBar = healthBar,
+            HealthBarGradient = healthBarGradient,
+            HealthText = healthText,
+            HealthTextGradient = healthTextGradient,
+            NameText = nameText,
+            NameTextGradient = nameTextGradient,
+            AvatarImage = avatarImage,
+            WeaponRow = weaponRow,
+            WeaponIcon = weaponIcon,
+            WeaponText = weaponText,
+            WeaponTextGradient = weaponTextGradient,
+            DistanceText = distanceText,
+            DistanceTextGradient = distanceTextGradient,
+            BackpackText = backpackText,
+            BackpackTextGradient = backpackTextGradient,
+            Gradients = {
+                glowGradient,
+                strokeGradient,
+                fillGradient,
+                healthBarGradient,
+                healthTextGradient,
+                nameTextGradient,
+                weaponTextGradient,
+                distanceTextGradient,
+                backpackTextGradient
+            },
+            Character = nil,
+            Hrp = nil,
+            Head = nil,
+            Humanoid = nil,
+            Sequence = nil,
+            NextSlow = 0,
+            WasVisible = false,
+            LastBackpack = {},
+            BackpackString = "",
+            BackpackHasUnknown = false,
+            BackpackTime = 0,
+            BackpackLimit = 0
+        }
+    end
+
+    local function removeESP(player)
+        local obj = Objects[player]
+        if not obj then
+            return
+        end
+        obj.Box:Destroy()
+        Objects[player] = nil
+    end
+
+    local function backpackChanged(obj, children)
+        local last = obj.LastBackpack
+        if #last ~= #children then
+            return true
+        end
+        for index, child in ipairs(children) do
+            if last[index] ~= child then
+                return true
+            end
+        end
+        return false
+    end
+
+    local function buildBackpackString(children, now)
+        local order = {}
+        local counts = {}
+        local hasUnknown = false
+        for _, tool in ipairs(children) do
+            if tool:IsA("Tool") then
+                local name = getResolved(tool, now)
+                if name == "Item" then
+                    hasUnknown = true
+                end
+                if name ~= "Fists" then
+                    if counts[name] then
+                        counts[name] = counts[name] + 1
+                    else
+                        counts[name] = 1
+                        table.insert(order, name)
+                    end
+                end
+            end
+        end
+
+        if #order == 0 then
+            return "", hasUnknown
+        end
+
+        local parts = {}
+        local limit = math.max(1, Settings.MaxBackpackItems)
+        for index, name in ipairs(order) do
+            if index > limit then
+                table.insert(parts, "+" .. (#order - limit))
+                break
+            end
+            if counts[name] > 1 then
+                table.insert(parts, name .. " x" .. counts[name])
+            else
+                table.insert(parts, name)
+            end
+        end
+        return "[" .. table.concat(parts, ", ") .. "]", hasUnknown
+    end
+
+    local function refreshBackpack(obj, now)
+        local backpack = obj.Player:FindFirstChildOfClass("Backpack")
+        local children = backpack and backpack:GetChildren() or {}
+        local changed = backpackChanged(obj, children) or obj.BackpackLimit ~= Settings.MaxBackpackItems
+        if changed or (obj.BackpackHasUnknown and now - obj.BackpackTime >= Settings.RetryUnknown) then
+            obj.LastBackpack = children
+            obj.BackpackLimit = Settings.MaxBackpackItems
+            obj.BackpackString, obj.BackpackHasUnknown = buildBackpackString(children, now)
+            obj.BackpackTime = now
+        end
+        return obj.BackpackString
+    end
+
+    local function setGradient(gradient, enabled, colorSeq)
+        set(gradient, "Enabled", enabled)
+        if enabled and gradient.Color ~= colorSeq then
+            gradient.Color = colorSeq
+        end
+    end
+
+    local function updateContent(obj, now)
+        local player = obj.Player
+        local character = obj.Character
+        local humanoid = obj.Humanoid
+        local hrp = obj.Hrp
+        local colorSeq = getSequence()
+        local white = Color3.fromRGB(255, 255, 255)
+
+        set(obj.Glow, "Visible", Settings.Glow)
+        set(obj.Glow, "ImageTransparency", Settings.GlowTransparency)
+        setGradient(obj.GlowGradient, Settings.Glow and Settings.GlowGradient, colorSeq)
+        set(obj.Glow, "ImageColor3", Settings.GlowGradient and white or Settings.GlowColor)
+
+        set(obj.Stroke, "Enabled", Settings.Box)
+        setGradient(obj.StrokeGradient, Settings.Box and Settings.BoxGradient, colorSeq)
+        set(obj.Stroke, "Color", Settings.BoxGradient and white or Settings.BoxColor)
+
+        set(obj.Fill, "Visible", Settings.Box)
+        setGradient(obj.FillGradient, Settings.Box and Settings.BoxGradient, colorSeq)
+        set(obj.Fill, "BackgroundColor3", Settings.BoxGradient and white or Settings.BoxColor)
+
+        local maxHealth = humanoid.MaxHealth > 0 and humanoid.MaxHealth or 100
+        local health = math.clamp(humanoid.Health, 0, maxHealth)
+        local healthPercent = health / maxHealth
+        local healthColor = Color3.fromRGB(255, 0, 0):Lerp(Color3.fromRGB(0, 255, 0), healthPercent)
+
+        set(obj.HealthBarBg, "Visible", Settings.HealthBar)
+        if Settings.HealthBar then
+            obj.HealthBar.Size = UDim2.fromScale(1, healthPercent)
+            obj.HealthBar.Position = UDim2.fromScale(0, 1 - healthPercent)
+            setGradient(obj.HealthBarGradient, Settings.HealthBarGradient, colorSeq)
+            set(obj.HealthBar, "BackgroundColor3", Settings.HealthBarGradient and white or healthColor)
+        end
+
+        set(obj.HealthText, "Visible", Settings.HealthText)
+        if Settings.HealthText then
+            set(obj.HealthText, "Text", math.floor(health) .. " HP")
+            setGradient(obj.HealthTextGradient, Settings.HealthTextGradient, colorSeq)
+            set(obj.HealthText, "TextColor3", Settings.HealthTextGradient and white or healthColor)
+        end
+
+        local nameVisible = Settings.DisplayName or Settings.Name
+        set(obj.NameText, "Visible", nameVisible)
+        if Settings.DisplayName and Settings.Name then
+            set(obj.NameText, "Text", player.DisplayName .. " (@" .. player.Name .. ")")
+        elseif Settings.DisplayName then
+            set(obj.NameText, "Text", player.DisplayName)
+        elseif Settings.Name then
+            set(obj.NameText, "Text", "@" .. player.Name)
+        end
+        setGradient(obj.NameTextGradient, nameVisible and Settings.NameGradient, colorSeq)
+
+        set(obj.AvatarImage, "Visible", Settings.Avatar)
+        if Settings.Avatar then
+            obj.AvatarImage.Position = nameVisible and UDim2.new(0.5, -12.5, 0, -43) or UDim2.new(0.5, -12.5, 0, -27)
+        end
+
+        local bottomOffset = 2
+
+        local tool = Settings.Weapon and character:FindFirstChildOfClass("Tool") or nil
+        if tool then
+            local name, image = getResolved(tool, now)
+            set(obj.WeaponRow, "Visible", true)
+            set(obj.WeaponText, "Text", name)
+            set(obj.WeaponIcon, "Visible", Settings.WeaponImage)
+            set(obj.WeaponIcon, "Image", image)
+            obj.WeaponRow.Position = UDim2.new(0, 0, 1, bottomOffset)
+            setGradient(obj.WeaponTextGradient, Settings.WeaponGradient, colorSeq)
+            bottomOffset = bottomOffset + 18
+        else
+            set(obj.WeaponRow, "Visible", false)
+        end
+
+        if Settings.Distance then
+            local myCharacter = LocalPlayer.Character
+            local myHrp = myCharacter and myCharacter:FindFirstChild("HumanoidRootPart")
+            local origin = myHrp and myHrp.Position or workspace.CurrentCamera.CFrame.Position
+            local distance = math.floor((hrp.Position - origin).Magnitude)
+            set(obj.DistanceText, "Visible", true)
+            set(obj.DistanceText, "Text", distance .. " Studs")
+            obj.DistanceText.Position = UDim2.new(0, 0, 1, bottomOffset)
+            setGradient(obj.DistanceTextGradient, Settings.DistanceGradient, colorSeq)
+            set(obj.DistanceText, "TextColor3", Settings.DistanceGradient and white or Color3.fromRGB(200, 200, 200))
+            bottomOffset = bottomOffset + 14
+        else
+            set(obj.DistanceText, "Visible", false)
+        end
+
+        local backpackString = Settings.Backpack and refreshBackpack(obj, now) or ""
+        if backpackString ~= "" then
+            set(obj.BackpackText, "Visible", true)
+            set(obj.BackpackText, "Text", backpackString)
+            obj.BackpackText.Position = UDim2.new(0, 0, 1, bottomOffset)
+            setGradient(obj.BackpackTextGradient, Settings.BackpackGradient, colorSeq)
+            set(obj.BackpackText, "TextColor3", Settings.BackpackGradient and white or Color3.fromRGB(180, 180, 180))
+        else
+            set(obj.BackpackText, "Visible", false)
+        end
+    end
+
+    local function refreshCharacter(obj)
+        local character = obj.Player.Character
+        if not character then
+            obj.Character = nil
+            obj.Hrp = nil
+            obj.Head = nil
+            obj.Humanoid = nil
+            return false
+        end
+
+        if obj.Character ~= character or not obj.Hrp or not obj.Hrp.Parent or not obj.Humanoid or not obj.Humanoid.Parent then
+            obj.Character = character
+            obj.Hrp = character:FindFirstChild("HumanoidRootPart")
+            obj.Head = character:FindFirstChild("Head")
+            obj.Humanoid = character:FindFirstChildOfClass("Humanoid")
+            obj.NextSlow = 0
+        end
+
+        return obj.Hrp ~= nil and obj.Humanoid ~= nil
+    end
+
+    local function updateESP(obj, camera, anyEnabled, now)
+        if not anyEnabled or not refreshCharacter(obj) then
+            obj.Box.Visible = false
+            obj.WasVisible = false
+            return
+        end
+
+        local hrp = obj.Hrp
+        local humanoid = obj.Humanoid
+
+        if humanoid.Health <= 0 then
+            obj.Box.Visible = false
+            obj.WasVisible = false
+            return
+        end
+
+        local hrpPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
+        if not onScreen then
+            obj.Box.Visible = false
+            obj.WasVisible = false
+            return
+        end
+
+        local head = obj.Head
+        local topPos = head and head.Position + Vector3.new(0, 0.5, 0) or (hrp.Position + Vector3.new(0, 3, 0))
+        local bottomPos = hrp.Position - Vector3.new(0, 3.5, 0)
+
+        local topScreen = camera:WorldToViewportPoint(topPos)
+        local bottomScreen = camera:WorldToViewportPoint(bottomPos)
+
+        local height = math.max(math.abs(topScreen.Y - bottomScreen.Y), 2)
+        local width = height * 0.65
+
+        obj.Box.Position = UDim2.fromOffset(hrpPos.X - (width / 2), topScreen.Y)
+        obj.Box.Size = UDim2.fromOffset(width, height)
+
+        if not obj.WasVisible then
+            obj.WasVisible = true
+            obj.NextSlow = 0
+        end
+
+        if now >= obj.NextSlow then
+            obj.NextSlow = now + Settings.UpdateRate
+            updateContent(obj, now)
+        end
+
+        local rotation = Settings.GradientAnimation and Angle or 0
+        for index, gradient in ipairs(obj.Gradients) do
+            local target = BaseRotation[index] + rotation
+            if gradient.Rotation ~= target then
+                gradient.Rotation = target
+            end
+        end
+
+        obj.Box.Visible = true
+    end
+
+    local function onPlayerAdded(player)
+        if player == LocalPlayer then
+            return
+        end
+        Objects[player] = createESP(player)
+    end
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        onPlayerAdded(player)
+    end
+
+    table.insert(Connections, Players.PlayerAdded:Connect(onPlayerAdded))
+    table.insert(Connections, Players.PlayerRemoving:Connect(removeESP))
+
+    RunService:BindToRenderStep("ESPUpdate", Enum.RenderPriority.Camera.Value + 1, function(dt)
+        local camera = workspace.CurrentCamera
+        if not camera then
+            return
+        end
+        local anyEnabled = Settings.Enabled and (Settings.Box or Settings.Glow or Settings.HealthBar or Settings.HealthText or Settings.Name or Settings.DisplayName or Settings.Avatar or Settings.Weapon or Settings.Distance or Settings.Backpack)
+        local now = os.clock()
+        Angle = (Angle + dt * Settings.GradientAnimationSpeed * 20) % 360
+        for _, obj in pairs(Objects) do
+            updateESP(obj, camera, anyEnabled, now)
+        end
+    end)
+
+    getgenv().BestESP_Cleanup = function()
+        pcall(function()
+            RunService:UnbindFromRenderStep("ESPUpdate")
+        end)
+        for _, connection in ipairs(Connections) do
+            connection:Disconnect()
+        end
+        table.clear(Connections)
+        table.clear(Objects)
+        ScreenGui:Destroy()
+    end
+
+    Library:OnUnload(function()
+        pcall(getgenv().BestESP_Cleanup)
+    end)
+
+    local Tab = Window:AddTab(Info.Name or Info.name or "Esp", Info.Icon or Info.icon or "scan-eye")
+
+    local function IsVisible(Key)
+        if Hidden[Key] == nil then
+            return true
+        end
+        return Hidden[Key]
+    end
+
+    local function AddToggle(Box, Key, Text)
+        return Box:AddToggle(Prefix .. Key, {
+            Text = Text,
+            Default = Settings[Key],
+            Visible = IsVisible(Key),
+            Callback = function(Value)
+                Settings[Key] = Value
+            end,
+        })
+    end
+
+    local function AddColor(Target, Key, Title)
+        return Target:AddColorPicker(Prefix .. Key, {
+            Default = Settings[Key],
+            Title = Title,
+            Callback = function(Value)
+                Settings[Key] = Value
+            end,
+        })
+    end
+
+    local function AddSlider(Box, Key, Text, Min, Max, Rounding, Suffix)
+        return Box:AddSlider(Prefix .. Key, {
+            Text = Text,
+            Default = Settings[Key],
+            Min = Min,
+            Max = Max,
+            Rounding = Rounding,
+            Suffix = Suffix or "",
+            Visible = IsVisible(Key),
+            Callback = function(Value)
+                Settings[Key] = Value
+            end,
+        })
+    end
+
+    local General = Tab:AddLeftGroupbox("General", "settings")
+    AddToggle(General, "Enabled", "Enable ESP")
+    AddToggle(General, "GradientAnimation", "Gradient Animation")
+    AddSlider(General, "GradientAnimationSpeed", "Animation Speed", 1, 10, 0)
+    AddColor(General:AddLabel("Gradient Color 1"), "GradientColor1", "Gradient Color 1")
+    AddColor(General:AddLabel("Gradient Color 2"), "GradientColor2", "Gradient Color 2")
+
+    local BoxGroup = Tab:AddLeftGroupbox("Box", "square")
+    AddColor(AddToggle(BoxGroup, "Box", "Box"), "BoxColor", "Box Color")
+    AddToggle(BoxGroup, "BoxGradient", "Box Gradient")
+
+    local GlowGroup = Tab:AddLeftGroupbox("Glow", "sun")
+    AddColor(AddToggle(GlowGroup, "Glow", "Glow"), "GlowColor", "Glow Color")
+    AddToggle(GlowGroup, "GlowGradient", "Glow Gradient")
+    AddSlider(GlowGroup, "GlowTransparency", "Transparency", 0, 1, 2)
+
+    local HealthGroup = Tab:AddLeftGroupbox("Health", "heart")
+    AddToggle(HealthGroup, "HealthBar", "Health Bar")
+    AddToggle(HealthGroup, "HealthBarGradient", "Health Bar Gradient")
+    AddToggle(HealthGroup, "HealthText", "Health Text")
+    AddToggle(HealthGroup, "HealthTextGradient", "Health Text Gradient")
+
+    local NameGroup = Tab:AddRightGroupbox("Name", "user")
+    AddToggle(NameGroup, "Name", "Username")
+    AddToggle(NameGroup, "DisplayName", "Display Name")
+    AddToggle(NameGroup, "NameGradient", "Name Gradient")
+    AddToggle(NameGroup, "Avatar", "Avatar")
+
+    local WeaponGroup = Tab:AddRightGroupbox("Weapon", "crosshair")
+    AddToggle(WeaponGroup, "Weapon", "Weapon")
+    AddToggle(WeaponGroup, "WeaponImage", "Weapon Image")
+    AddToggle(WeaponGroup, "WeaponGradient", "Weapon Gradient")
+
+    local BackpackGroup = Tab:AddRightGroupbox("Backpack", "backpack")
+    AddToggle(BackpackGroup, "Backpack", "Backpack")
+    AddToggle(BackpackGroup, "BackpackGradient", "Backpack Gradient")
+    AddSlider(BackpackGroup, "MaxBackpackItems", "Max Items", 1, 12, 0)
+
+    local DistanceGroup = Tab:AddRightGroupbox("Distance", "ruler")
+    AddToggle(DistanceGroup, "Distance", "Distance")
+    AddToggle(DistanceGroup, "DistanceGradient", "Distance Gradient")
+
+    local PerformanceGroup = Tab:AddRightGroupbox("Performance", "gauge")
+    AddSlider(PerformanceGroup, "UpdateRate", "Update Rate", 0.05, 1, 2, "s")
+
+    return {
+        Tab = Tab,
+        Settings = Settings,
+        Unload = function()
+            pcall(getgenv().BestESP_Cleanup)
+        end,
+    }
+end
+
 function Library:Unload()
     Library.Unloaded = true
 
-    --// Disconnect connections
     for Index = #Library.Signals, 1, -1 do
         local Connection = table.remove(Library.Signals, Index)
 
@@ -15418,7 +16170,6 @@ function Library:Unload()
         end
     end
 
-    --// Run Unload Callbacks
     for _ = 1, #Library.UnloadSignals do
         local Callback = table.remove(Library.UnloadSignals, 1)
 
@@ -15427,7 +16178,6 @@ function Library:Unload()
         end
     end
 
-    --// Destroy elements
     for Index = #Library.Tabs, 1, -1 do
         local Tab = table.remove(Library.Tabs, Index)
 
@@ -15456,7 +16206,6 @@ function Library:Unload()
         ScreenGui:Destroy()
     end
 
-    --// Clear tables
     table.clear(Library.Registry)
 
     table.clear(Options)
