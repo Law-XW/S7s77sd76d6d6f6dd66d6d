@@ -16127,6 +16127,134 @@ function Library:AddESPManager(Window, Info)
     AddToggle(HealthGroup, "HealthText", "Health Text")
     AddToggle(HealthGroup, "HealthTextGradient", "Health Text Gradient")
 
+    local PreviewGroup = Tab:AddRightGroupbox("Preview", "scan-eye")
+    local PreviewState = { Rotate = true, Speed = 40, Rotation = 0, Next = 0 }
+
+    local PreviewFrame = Instance.new("Frame")
+    PreviewFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+    PreviewFrame.BorderSizePixel = 0
+    PreviewFrame.ClipsDescendants = true
+    PreviewFrame.Size = UDim2.fromScale(1, 1)
+
+    local Viewport = Instance.new("ViewportFrame")
+    Viewport.BackgroundTransparency = 1
+    Viewport.Size = UDim2.fromScale(1, 1)
+    Viewport.Parent = PreviewFrame
+
+    local Dummy = Instance.new("Model")
+    local function DummyPart(Name, Size, Position)
+        local Part = Instance.new("Part")
+        Part.Name = Name
+        Part.Size = Size
+        Part.Position = Position
+        Part.Anchored = true
+        Part.Material = Enum.Material.SmoothPlastic
+        Part.Color = Color3.fromRGB(125, 125, 135)
+        Part.Parent = Dummy
+    end
+    DummyPart("Head", Vector3.new(2, 1, 1), Vector3.new(0, 2, 0))
+    DummyPart("Torso", Vector3.new(2, 2, 1), Vector3.new(0, 0.5, 0))
+    DummyPart("LeftArm", Vector3.new(1, 2, 1), Vector3.new(-1.5, 0.5, 0))
+    DummyPart("RightArm", Vector3.new(1, 2, 1), Vector3.new(1.5, 0.5, 0))
+    DummyPart("LeftLeg", Vector3.new(1, 2, 1), Vector3.new(-0.5, -1.5, 0))
+    DummyPart("RightLeg", Vector3.new(1, 2, 1), Vector3.new(0.5, -1.5, 0))
+    Dummy.Parent = Viewport
+
+    local PreviewCamera = Instance.new("Camera")
+    PreviewCamera.FieldOfView = 70
+    PreviewCamera.CFrame = CFrame.lookAt(Vector3.new(0, 0, 7), Vector3.zero)
+    PreviewCamera.Parent = Viewport
+    Viewport.CurrentCamera = PreviewCamera
+
+    local FakeCharacter = Instance.new("Model")
+    local FakeHumanoid = Instance.new("Humanoid")
+    FakeHumanoid.MaxHealth = 100
+    FakeHumanoid.Health = 75
+    FakeHumanoid.Parent = FakeCharacter
+    local FakeRoot = Instance.new("Part")
+    FakeRoot.Name = "HumanoidRootPart"
+    FakeRoot.Parent = FakeCharacter
+    local FakeWeapon = Instance.new("Tool")
+    FakeWeapon.Name = "ExampleWeapon"
+    FakeWeapon:SetAttribute("Name", "Example Weapon")
+    FakeWeapon.Parent = FakeCharacter
+
+    local FakeBackpack = Instance.new("Folder")
+    for Index = 1, 2 do
+        local FakeTool = Instance.new("Tool")
+        FakeTool.Name = "ExampleTool" .. Index
+        FakeTool:SetAttribute("Name", "Example Tool " .. Index)
+        FakeTool.Parent = FakeBackpack
+    end
+
+    local FakePlayer = {
+        Name = LocalPlayer.Name,
+        DisplayName = LocalPlayer.DisplayName,
+        UserId = LocalPlayer.UserId,
+        FindFirstChildOfClass = function()
+            return FakeBackpack
+        end,
+    }
+
+    local PreviewObject = createESP(FakePlayer)
+    PreviewObject.Character = FakeCharacter
+    PreviewObject.Hrp = FakeRoot
+    PreviewObject.Humanoid = FakeHumanoid
+    PreviewObject.Box.Parent = PreviewFrame
+    PreviewObject.Box.Size = UDim2.fromOffset(100, 170)
+    PreviewObject.Box.Position = UDim2.new(0.5, -50, 0, 70)
+    PreviewObject.Box.Visible = true
+
+    Library:GiveSignal(RunService.RenderStepped:Connect(function(dt)
+        if not Library.Toggled then
+            return
+        end
+
+        if PreviewState.Rotate then
+            PreviewState.Rotation = (PreviewState.Rotation + dt * PreviewState.Speed) % 360
+        end
+        Dummy:PivotTo(CFrame.Angles(0, math.rad(PreviewState.Rotation), 0))
+
+        local now = os.clock()
+        if now >= PreviewState.Next then
+            PreviewState.Next = now + 0.1
+            updateContent(PreviewObject, now)
+            if Settings.Distance then
+                PreviewObject.DistanceText.Text = "25 Studs"
+            end
+        end
+
+        local rotation = Settings.GradientAnimation and Angle or 0
+        for index, gradient in ipairs(PreviewObject.Gradients) do
+            local target = BaseRotation[index] + rotation
+            if gradient.Rotation ~= target then
+                gradient.Rotation = target
+            end
+        end
+    end))
+
+    PreviewGroup:AddUIPassthrough(Prefix .. "Preview", {
+        Instance = PreviewFrame,
+        Height = 310,
+    })
+    PreviewGroup:AddToggle(Prefix .. "PreviewRotate", {
+        Text = "Rotate Preview",
+        Default = true,
+        Callback = function(Value)
+            PreviewState.Rotate = Value
+        end,
+    })
+    PreviewGroup:AddSlider(Prefix .. "PreviewRotationSpeed", {
+        Text = "Rotation Speed",
+        Default = 40,
+        Min = 10,
+        Max = 180,
+        Rounding = 0,
+        Callback = function(Value)
+            PreviewState.Speed = Value
+        end,
+    })
+
     local NameGroup = Tab:AddRightGroupbox("Name", "user")
     AddToggle(NameGroup, "Name", "Username")
     AddToggle(NameGroup, "DisplayName", "Display Name")
