@@ -15328,7 +15328,7 @@ function Library:AddESPManager(Window, Info)
         GradientAnimationSpeed = 4,
 
         UpdateRate = 0.2,
-        MaxDistance = 2000,
+        MaxDistance = 5000,
         RetryUnknown = 2,
         Fallback = "rbxassetid://93909275221626",
     }
@@ -15978,7 +15978,7 @@ function Library:AddESPManager(Window, Info)
         obj.WasVisible = false
     end
 
-    local function updateESP(obj, camera, cameraPosition, now)
+    local function updateESP(obj, camera, cameraPosition, viewport, now)
         if not refreshCharacter(obj) then
             hideESP(obj)
             return
@@ -16002,18 +16002,24 @@ function Library:AddESPManager(Window, Info)
         local topPos = head and head.Position + Vector3.new(0, 0.5, 0) or (position + Vector3.new(0, 3, 0))
         local bottomPos = position - Vector3.new(0, 3.5, 0)
 
-        local topScreen, topOn = camera:WorldToViewportPoint(topPos)
-        local bottomScreen, bottomOn = camera:WorldToViewportPoint(bottomPos)
-        if not (topOn or bottomOn) or topScreen.Z <= 0 or bottomScreen.Z <= 0 then
+        local topScreen = camera:WorldToViewportPoint(topPos)
+        local bottomScreen = camera:WorldToViewportPoint(bottomPos)
+        if topScreen.Z <= 0 or bottomScreen.Z <= 0 then
             hideESP(obj)
             return
         end
 
         local height = math.max(math.abs(topScreen.Y - bottomScreen.Y), 2)
         local width = height * 0.65
+        local centerX = (topScreen.X + bottomScreen.X) * 0.5
+
+        if centerX + width < 0 or centerX - width > viewport.X or topScreen.Y + height < 0 or topScreen.Y - height > viewport.Y then
+            hideESP(obj)
+            return
+        end
         local box = obj.Box
 
-        box.Position = UDim2.fromOffset((topScreen.X + bottomScreen.X) * 0.5 - width * 0.5, topScreen.Y)
+        box.Position = UDim2.fromOffset(centerX - width * 0.5, topScreen.Y)
         box.Size = UDim2.fromOffset(width, height)
 
         if not obj.WasVisible then
@@ -16092,9 +16098,10 @@ function Library:AddESPManager(Window, Info)
         end
 
         local cameraPosition = camera.CFrame.Position
+        local viewport = camera.ViewportSize
         local now = os.clock()
         for _, obj in pairs(Objects) do
-            updateESP(obj, camera, cameraPosition, now)
+            updateESP(obj, camera, cameraPosition, viewport, now)
         end
     end)
 
@@ -16329,7 +16336,7 @@ function Library:AddESPManager(Window, Info)
 
     local PerformanceGroup = Tab:AddRightGroupbox("Performance", "gauge")
     AddSlider(PerformanceGroup, "UpdateRate", "Update Rate", 0.05, 1, 2, "s")
-    AddSlider(PerformanceGroup, "MaxDistance", "Max Distance", 100, 5000, 0, " studs")
+    AddSlider(PerformanceGroup, "MaxDistance", "Max Distance", 100, 10000, 0, " studs")
 
     return {
         Tab = Tab,
