@@ -258,11 +258,11 @@ local Library = {
 
     IsLightTheme = false,
     Scheme = {
-        BackgroundColor = Color3.fromRGB(6, 10, 18),
-        MainColor = Color3.fromRGB(10, 18, 30),
+        BackgroundColor = Color3.fromRGB(16, 17, 20),
+        MainColor = Color3.fromRGB(23, 24, 28),
         AccentColor = Color3.fromRGB(24, 144, 255),
-        OutlineColor = Color3.fromRGB(22, 40, 64),
-        FontColor = Color3.fromRGB(230, 240, 255),
+        OutlineColor = Color3.fromRGB(42, 44, 51),
+        FontColor = Color3.fromRGB(230, 232, 236),
         Font = Font.fromEnum(Enum.Font.Code),
 
         RedColor = Color3.fromRGB(255, 50, 50),
@@ -10485,6 +10485,36 @@ function Library:SetFont(FontFace)
     if Library.Window and Library.Window.RefreshTitleSize then
         Library.Window:RefreshTitleSize()
     end
+end
+
+function Library:LoadFont(Name: string, Source: string): boolean
+    local FileName = Name .. ".ttf"
+    local JsonName = Name .. ".json"
+
+    local Success = pcall(function()
+        if not isfile(FileName) then
+            writefile(FileName, game:HttpGet(Source))
+        end
+
+        writefile(
+            JsonName,
+            game:GetService("HttpService"):JSONEncode({
+                name = Name,
+                faces = {
+                    {
+                        name = "Regular",
+                        weight = 400,
+                        style = "normal",
+                        assetId = getcustomasset(FileName),
+                    },
+                },
+            })
+        )
+
+        Library:SetFont(Font.new(getcustomasset(JsonName)))
+    end)
+
+    return Success
 end
 
 function Library:SetBackgroundImage(Image: string | number)

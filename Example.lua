@@ -264,11 +264,11 @@ ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 
 ThemeManager:SetDefaultTheme({
-    FontColor = "e6f0ff",
-    MainColor = "0a121e",
+    FontColor = "e6e8ec",
+    MainColor = "17181c",
     AccentColor = "1890ff",
-    BackgroundColor = "000000",
-    OutlineColor = "16283f",
+    BackgroundColor = "101114",
+    OutlineColor = "2a2c33",
     FontFace = "Code",
 })
 
@@ -281,3 +281,5 @@ SaveManager:BuildConfigSection(UiSettingsTab)
 ThemeManager:ApplyToTab(UiSettingsTab)
 
 SaveManager:LoadAutoloadConfig()
+
+Library:LoadFont("Absender", Repo .. "Absender.ttf")
