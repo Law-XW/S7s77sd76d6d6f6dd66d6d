@@ -11730,6 +11730,42 @@ function Library:CreateWindow(WindowInfo)
             Parent = Container,
         })
 
+        local FadeCover = New("Frame", {
+            BackgroundColor3 = function()
+                return Library:GetBetterColor(Library.Scheme.BackgroundColor, 1)
+            end,
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Active = false,
+            Name = "FadeCover",
+            Position = UDim2.fromOffset(-6, 0),
+            Size = UDim2.new(1, 12, 1, 0),
+            Visible = false,
+            ZIndex = 50,
+            Parent = Container,
+        })
+        local FadeToken = 0
+
+        function Library:PlayFade(Duration: number?)
+            FadeToken += 1
+            local Token = FadeToken
+
+            FadeCover.BackgroundTransparency = 0
+            FadeCover.Visible = true
+
+            local Tween = TweenService:Create(
+                FadeCover,
+                TweenInfo.new(Duration or 0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                { BackgroundTransparency = 1 }
+            )
+            Tween.Completed:Connect(function()
+                if FadeToken == Token then
+                    FadeCover.Visible = false
+                end
+            end)
+            Tween:Play()
+        end
+
         Library.WindowContainer = Container
     end
 
@@ -13469,6 +13505,7 @@ function Library:CreateWindow(WindowInfo)
                 PageFrame.Visible = true
                 Tab.ActiveSubTab = SubTab
                 Tab:RefreshSides()
+                Library:PlayFade(0.2)
 
                 if Library.Searching then
                     Library:UpdateSearch(Library.SearchText)
@@ -13616,6 +13653,7 @@ function Library:CreateWindow(WindowInfo)
             end
 
             Library:PlayTabAnimation(Tab, true)
+            Library:PlayFade()
             Tab:RefreshSides()
 
             Library.ActiveTab = Tab
@@ -14065,6 +14103,7 @@ function Library:CreateWindow(WindowInfo)
             end
 
             Library:PlayTabAnimation(Tab, true)
+            Library:PlayFade()
 
             if Description then
                 Window:ShowTabInfo(Name, Description)

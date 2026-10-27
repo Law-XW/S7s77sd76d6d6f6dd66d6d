@@ -14,6 +14,7 @@ local Window = Library:CreateWindow({
     ShowCustomCursor = true,
     CornerRadius = 5,
     Compact = true,
+    SearchbarSize = UDim2.new(0, 150, 1, 0),
 })
 
 local ExampleTab = Window:AddTab("Example", "box")
