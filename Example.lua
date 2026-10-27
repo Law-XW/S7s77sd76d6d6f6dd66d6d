@@ -13,6 +13,7 @@ local Window = Library:CreateWindow({
     NotifySide = "Right",
     ShowCustomCursor = true,
     CornerRadius = 5,
+    Compact = true,
 })
 
 local ExampleTab = Window:AddTab("Example", "box")
@@ -269,7 +270,7 @@ ThemeManager:SetDefaultTheme({
     AccentColor = "1890ff",
     BackgroundColor = "101114",
     OutlineColor = "2a2c33",
-    FontFace = "Code",
+    FontFace = "JosefinSans",
 })
 
 SaveManager:IgnoreThemeSettings()
@@ -281,5 +282,3 @@ SaveManager:BuildConfigSection(UiSettingsTab)
 ThemeManager:ApplyToTab(UiSettingsTab)
 
 SaveManager:LoadAutoloadConfig()
-
-Library:LoadFont("Absender", Repo .. "Absender.ttf")
