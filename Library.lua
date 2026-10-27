@@ -204,6 +204,8 @@ local Library = {
 
     Corners = {},
     SpecificCorners = {},
+    PumpkinHeads = {},
+    Halloween = false,
 
     TweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 
@@ -7998,6 +8000,19 @@ do
             })
         )
 
+        local PumpkinHead = New("TextLabel", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundTransparency = 1,
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.fromOffset(22, 22),
+            Text = "\u{1F383}",
+            TextSize = 20,
+            Visible = Library.Halloween == true,
+            ZIndex = Bar.ZIndex + 4,
+            Parent = Bar,
+        })
+        table.insert(Library.PumpkinHeads, PumpkinHead)
+
         function Slider:UpdateColors()
             if Library.Unloaded then
                 return
@@ -8049,6 +8064,7 @@ do
 
             local X = (Slider.Value - Slider.Min) / (Slider.Max - Slider.Min)
             Fill.Size = UDim2.fromScale(X, 1)
+            PumpkinHead.Position = UDim2.new(X, math.floor((0.5 - X) * 12), 0.5, 0)
         end
 
         function Slider:OnChanged(Func)
@@ -10515,6 +10531,89 @@ function Library:LoadFont(Name: string, Source: string): boolean
     end)
 
     return Success
+end
+
+function Library:SetHalloween(Enabled: boolean)
+    Library.Halloween = Enabled == true
+
+    for Index = #Library.PumpkinHeads, 1, -1 do
+        local Head = Library.PumpkinHeads[Index]
+        if Head.Parent then
+            Head.Visible = Library.Halloween
+        else
+            table.remove(Library.PumpkinHeads, Index)
+        end
+    end
+
+    if Library.HalloweenDecor then
+        Library.HalloweenDecor:Destroy()
+        Library.HalloweenDecor = nil
+    end
+
+    local Window = Library.Window
+    if not Library.Halloween or not Window or not Window.MainFrame then
+        return
+    end
+
+    local Decor = New("Frame", {
+        BackgroundTransparency = 1,
+        Name = "HalloweenDecor",
+        Active = false,
+        Size = UDim2.fromScale(1, 1),
+        ZIndex = 60,
+        Parent = Window.MainFrame,
+    })
+    Library.HalloweenDecor = Decor
+
+    local function Emoji(Text: string, Size: number, Position: UDim2, Transparency: number?)
+        return New("TextLabel", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundTransparency = 1,
+            Position = Position,
+            Size = UDim2.fromOffset(Size, Size),
+            Text = Text,
+            TextSize = Size,
+            TextTransparency = Transparency or 0,
+            ZIndex = 61,
+            Parent = Decor,
+        })
+    end
+
+    local function Loop(Object: Instance, Goal: { [string]: any }, Time: number)
+        TweenService:Create(
+            Object,
+            TweenInfo.new(Time, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+            Goal
+        ):Play()
+    end
+
+    local function Spider(Scale: number, Short: number, Long: number, Time: number)
+        local Thread = New("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0),
+            BackgroundColor3 = Color3.fromRGB(210, 210, 215),
+            BackgroundTransparency = 0.45,
+            BorderSizePixel = 0,
+            Position = UDim2.new(Scale, 0, 0, 0),
+            Size = UDim2.fromOffset(1, Short),
+            ZIndex = 61,
+            Parent = Decor,
+        })
+        local Body = Emoji("\u{1F577}\u{FE0F}", 18, UDim2.new(Scale, 0, 0, Short + 8))
+
+        Loop(Thread, { Size = UDim2.fromOffset(1, Long) }, Time)
+        Loop(Body, { Position = UDim2.new(Scale, 0, 0, Long + 8) }, Time)
+    end
+
+    Spider(0.46, 14, 30, 1.7)
+    Spider(0.68, 22, 40, 2.2)
+
+    local GhostOne = Emoji("\u{1F47B}", 26, UDim2.new(0, 24, 1, -74), 0.15)
+    Loop(GhostOne, { Position = UDim2.new(0, 24, 1, -84) }, 1.8)
+
+    local GhostTwo = Emoji("\u{1F47B}", 24, UDim2.new(1, -36, 1, -78), 0.3)
+    Loop(GhostTwo, { Position = UDim2.new(1, -36, 1, -90) }, 2.3)
+
+    Emoji("\u{1F383}", 22, UDim2.new(0, 24, 1, -30))
 end
 
 function Library:SetBackgroundImage(Image: string | number)
@@ -14966,6 +15065,10 @@ function Library:CreateWindow(WindowInfo)
 
     Window.MainFrame = MainFrame
     Library.Window = Window
+
+    if Library.Halloween then
+        Library:SetHalloween(true)
+    end
 
     return Window
 end

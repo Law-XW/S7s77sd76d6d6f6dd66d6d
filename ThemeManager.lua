@@ -128,6 +128,10 @@ local ThemeManager = {
         ["Material"] = {
             18,
             { FontColor = "eeffff", MainColor = "212121", AccentColor = "82aaff", BackgroundColor = "151515", OutlineColor = "424242", BackgroundImage = "" },
+        },
+        ["Halloween"] = {
+            19,
+            { FontColor = "fff2e0", MainColor = "1f1528", AccentColor = "ff7a18", BackgroundColor = "140d1a", OutlineColor = "3d2a4f", BackgroundImage = "", Halloween = true },
         }
     }
 }
@@ -648,6 +652,8 @@ function ThemeManager:ApplyThemeData(ThemeData: any): (boolean, string?)
     end
 
     local Library = ThemeManager.Library
+
+    Library:SetHalloween(ThemeData.Halloween == true)
 
     for Index, Value in ThemeData do
         if Index == "VideoLink" then
