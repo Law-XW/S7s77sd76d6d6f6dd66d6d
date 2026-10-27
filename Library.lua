@@ -12207,6 +12207,13 @@ function Library:CreateWindow(WindowInfo)
                 TabLeft,
                 TabRight,
             },
+            PageSides = {
+                TabLeft,
+                TabRight,
+            },
+            SubTabs = {},
+            SubTabList = {},
+            ActiveSubTab = nil,
             WarningBox = {
                 IsNormal = false,
                 LockSize = false,
@@ -12219,6 +12226,8 @@ function Library:CreateWindow(WindowInfo)
             Tabboxes = {},
             DependencyGroupboxes = {},
         }
+
+        local SubTabBar
 
         local WarningBoxHolder = New("Frame", {
             AutomaticSize = Enum.AutomaticSize.Y,
@@ -12362,9 +12371,19 @@ function Library:CreateWindow(WindowInfo)
 
         function Tab:RefreshSides()
             local Offset = WarningBoxHolder.Visible and WarningBox.Size.Y.Offset + 8 or 0
-            for _, Side in Tab.Sides do
+            for _, Side in { TabLeft, TabRight } do
                 Side.Position = UDim2.new(Side.Position.X.Scale, 0, 0, Offset)
                 Side.Size = UDim2.new(0.5, -3, 1, -Offset)
+            end
+
+            if SubTabBar then
+                SubTabBar.Position = UDim2.fromOffset(2, Offset)
+
+                local PageOffset = Offset + 40
+                for _, Page in Tab.SubTabList do
+                    Page.Frame.Position = UDim2.fromOffset(0, PageOffset)
+                    Page.Frame.Size = UDim2.new(1, 0, 1, -PageOffset)
+                end
             end
         end
 
@@ -12411,7 +12430,7 @@ function Library:CreateWindow(WindowInfo)
                 AutomaticSize = Enum.AutomaticSize.Y,
                 BackgroundTransparency = 1,
                 Size = UDim2.fromScale(1, 0),
-                Parent = if IsNested then ParentObj.Container else (Info.Side == 1 and TabLeft or TabRight),
+                Parent = if IsNested then ParentObj.Container else ParentObj.PageSides[Info.Side == 1 and 1 or 2],
             })
             New("UIListLayout", {
                 Padding = UDim.new(0, 6),
@@ -12781,7 +12800,7 @@ function Library:CreateWindow(WindowInfo)
             return Tab:AddTabbox({ Side = 2, Name = Name })
         end
 
-        function Tab:AddGroupbox(Info)
+        local function AddGroupbox(self, Info)
             Info = Library:Validate(Info, Templates.Groupbox)
 
             if typeof(Info.Side) == "string" then
@@ -12797,7 +12816,7 @@ function Library:CreateWindow(WindowInfo)
                 AutomaticSize = Enum.AutomaticSize.Y,
                 BackgroundTransparency = 1,
                 Size = UDim2.fromScale(1, 0),
-                Parent = (Info.Side == 1) and TabLeft or TabRight,
+                Parent = self.PageSides[(Info.Side == 1) and 1 or 2],
             })
             local BoxHolderList = New("UIListLayout", {
                 Padding = UDim.new(0, 6),
@@ -13188,7 +13207,11 @@ function Library:CreateWindow(WindowInfo)
             setmetatable(Groupbox, BaseGroupbox)
 
             Groupbox:Resize()
-            Tab.Groupboxes[Info.Name] = Groupbox
+            if Tab.Groupboxes[Info.Name] then
+                table.insert(Tab.Groupboxes, Groupbox)
+            else
+                Tab.Groupboxes[Info.Name] = Groupbox
+            end
 
             if Info.Visible == false then
                 Groupbox:Hide()
@@ -13201,12 +13224,320 @@ function Library:CreateWindow(WindowInfo)
             return Groupbox
         end
 
+        Tab.AddGroupbox = AddGroupbox
+
         function Tab:AddLeftGroupbox(Name, IconName, Visible, Collapsed, DisableCollapsing)
             return Tab:AddGroupbox({ Side = 1, Name = Name, IconName = IconName, Visible = Visible, Collapsed = Collapsed, DisableCollapsing = DisableCollapsing })
         end
 
         function Tab:AddRightGroupbox(Name, IconName, Visible, Collapsed, DisableCollapsing)
             return Tab:AddGroupbox({ Side = 2, Name = Name, IconName = IconName, Visible = Visible, Collapsed = Collapsed, DisableCollapsing = DisableCollapsing })
+        end
+
+        local function BuildPageSide(Parent, IsRight)
+            local Side = New("ScrollingFrame", {
+                AnchorPoint = IsRight and Vector2.new(1, 0) or Vector2.zero,
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                BackgroundTransparency = 1,
+                CanvasSize = UDim2.fromScale(0, 0),
+                Position = IsRight and UDim2.fromScale(1, 0) or UDim2.fromScale(0, 0),
+                ScrollBarImageTransparency = 1,
+                ScrollBarThickness = 0,
+                Size = UDim2.new(0.5, -3, 1, 0),
+                Parent = Parent,
+            })
+            New("UIListLayout", {
+                Padding = UDim.new(0, 2),
+                Parent = Side,
+            })
+            New("UIPadding", {
+                PaddingBottom = UDim.new(0, 2),
+                PaddingLeft = UDim.new(0, 2),
+                PaddingRight = UDim.new(0, 2),
+                PaddingTop = UDim.new(0, 2),
+                Parent = Side,
+            })
+            New("Frame", {
+                BackgroundTransparency = 1,
+                LayoutOrder = -1,
+                Parent = Side,
+            })
+            New("Frame", {
+                BackgroundTransparency = 1,
+                LayoutOrder = 1,
+                Parent = Side,
+            })
+
+            return Side
+        end
+
+        function Tab:AddSubTab(SubName, SubIcon)
+            SubName = tostring(SubName or "SubTab")
+
+            if Tab.SubTabs[SubName] then
+                return Tab.SubTabs[SubName]
+            end
+
+            if not SubTabBar then
+                SubTabBar = New("Frame", {
+                    BackgroundColor3 = "BackgroundColor",
+                    Position = UDim2.fromOffset(2, 0),
+                    Size = UDim2.new(1, -5, 0, 34),
+                    Parent = TabContainer,
+                })
+                table.insert(
+                    Library.Corners,
+                    New("UICorner", {
+                        CornerRadius = UDim.new(0, WindowInfo.CornerRadius),
+                        Parent = SubTabBar,
+                    })
+                )
+                Library:AddOutline(SubTabBar)
+                New("UIPadding", {
+                    PaddingBottom = UDim.new(0, 3),
+                    PaddingLeft = UDim.new(0, 3),
+                    PaddingRight = UDim.new(0, 3),
+                    PaddingTop = UDim.new(0, 3),
+                    Parent = SubTabBar,
+                })
+                New("UIListLayout", {
+                    FillDirection = Enum.FillDirection.Horizontal,
+                    HorizontalFlex = Enum.UIFlexAlignment.Fill,
+                    Padding = UDim.new(0, 3),
+                    VerticalAlignment = Enum.VerticalAlignment.Center,
+                    Parent = SubTabBar,
+                })
+
+                TabLeft.Visible = false
+                TabRight.Visible = false
+            end
+
+            local IsEmpty = Trim(SubName) == ""
+
+            local SubButton = New("TextButton", {
+                BackgroundColor3 = "MainColor",
+                BackgroundTransparency = 1,
+                LayoutOrder = #Tab.SubTabList + 1,
+                Size = UDim2.fromOffset(0, 28),
+                Text = "",
+                Parent = SubTabBar,
+            })
+            table.insert(
+                Library.Corners,
+                New("UICorner", {
+                    CornerRadius = UDim.new(0, WindowInfo.CornerRadius / 2),
+                    Parent = SubButton,
+                })
+            )
+
+            local SubContent = New("Frame", {
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                AutomaticSize = Enum.AutomaticSize.X,
+                BackgroundTransparency = 1,
+                Position = UDim2.fromScale(0.5, 0.5),
+                Size = UDim2.fromOffset(0, 16),
+                Parent = SubButton,
+            })
+            New("UIListLayout", {
+                FillDirection = Enum.FillDirection.Horizontal,
+                HorizontalAlignment = Enum.HorizontalAlignment.Center,
+                VerticalAlignment = Enum.VerticalAlignment.Center,
+                Padding = UDim.new(0, 8),
+                Parent = SubContent,
+            })
+
+            local SubIconLabel
+            local SubIconInfo = Library:GetCustomIcon(SubIcon)
+            if SubIconInfo then
+                SubIconLabel = New("ImageLabel", {
+                    ImageColor3 = SubIconInfo.Custom and "WhiteColor" or "AccentColor",
+                    ImageTransparency = 0.5,
+                    Size = UDim2.fromOffset(16, 16),
+                    Parent = SubContent,
+                })
+                Library:ApplyLucideIcon(SubIconLabel, SubIconInfo)
+            end
+
+            local SubLabel
+            if not IsEmpty then
+                SubLabel = New("TextLabel", {
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromOffset(0, 16),
+                    Text = SubName,
+                    TextSize = 15,
+                    TextTransparency = 0.5,
+                    Parent = SubContent,
+                })
+            end
+
+            local PageFrame = New("Frame", {
+                BackgroundTransparency = 1,
+                Position = UDim2.fromOffset(0, 40),
+                Size = UDim2.new(1, 0, 1, -40),
+                Visible = false,
+                Parent = TabContainer,
+            })
+            local PageLeft = BuildPageSide(PageFrame, false)
+            local PageRight = BuildPageSide(PageFrame, true)
+
+            table.insert(Tab.Sides, PageLeft)
+            table.insert(Tab.Sides, PageRight)
+
+            local SubTab = {
+                Type = "TabPage",
+                Name = SubName,
+
+                Destroyed = false,
+
+                Tab = Tab,
+                Window = Window,
+                Button = SubButton,
+                Frame = PageFrame,
+                PageSides = {
+                    PageLeft,
+                    PageRight,
+                },
+            }
+
+            SubTab.AddGroupbox = AddGroupbox
+            SubTab.AddTabbox = AddTabbox
+
+            function SubTab:AddLeftGroupbox(Name, IconName, Visible, Collapsed, DisableCollapsing)
+                return SubTab:AddGroupbox({ Side = 1, Name = Name, IconName = IconName, Visible = Visible, Collapsed = Collapsed, DisableCollapsing = DisableCollapsing })
+            end
+
+            function SubTab:AddRightGroupbox(Name, IconName, Visible, Collapsed, DisableCollapsing)
+                return SubTab:AddGroupbox({ Side = 2, Name = Name, IconName = IconName, Visible = Visible, Collapsed = Collapsed, DisableCollapsing = DisableCollapsing })
+            end
+
+            function SubTab:AddLeftTabbox(Name)
+                return SubTab:AddTabbox({ Side = 1, Name = Name })
+            end
+
+            function SubTab:AddRightTabbox(Name)
+                return SubTab:AddTabbox({ Side = 2, Name = Name })
+            end
+
+            function SubTab:Show()
+                if Tab.ActiveSubTab == SubTab then
+                    return
+                end
+
+                if Tab.ActiveSubTab then
+                    Tab.ActiveSubTab:Hide()
+                end
+
+                SubButton.BackgroundTransparency = 0
+                if SubLabel then
+                    SubLabel.TextTransparency = 0
+                end
+                if SubIconLabel then
+                    SubIconLabel.ImageTransparency = 0
+                end
+
+                PageFrame.Visible = true
+                Tab.ActiveSubTab = SubTab
+                Tab:RefreshSides()
+
+                if Library.Searching then
+                    Library:UpdateSearch(Library.SearchText)
+                end
+            end
+
+            function SubTab:Hide()
+                SubButton.BackgroundTransparency = 1
+                if SubLabel then
+                    SubLabel.TextTransparency = 0.5
+                end
+                if SubIconLabel then
+                    SubIconLabel.ImageTransparency = 0.5
+                end
+
+                PageFrame.Visible = false
+
+                if Tab.ActiveSubTab == SubTab then
+                    Tab.ActiveSubTab = nil
+                end
+            end
+
+            function SubTab:SetVisible(Visible: boolean)
+                SubButton.Visible = Visible
+
+                if not Visible and Tab.ActiveSubTab == SubTab then
+                    SubTab:Hide()
+
+                    for _, Other in Tab.SubTabList do
+                        if Other ~= SubTab and Other.Button.Visible then
+                            Other:Show()
+                            break
+                        end
+                    end
+                end
+            end
+
+            function SubTab:Destroy()
+                SubTab.Destroyed = true
+
+                if Tab.ActiveSubTab == SubTab then
+                    Tab.ActiveSubTab = nil
+                end
+
+                local Index = table.find(Tab.SubTabList, SubTab)
+                if Index then
+                    table.remove(Tab.SubTabList, Index)
+                end
+                Tab.SubTabs[SubName] = nil
+
+                for _, Side in SubTab.PageSides do
+                    local Found = table.find(Tab.Sides, Side)
+                    if Found then
+                        table.remove(Tab.Sides, Found)
+                    end
+                end
+
+                PageFrame:Destroy()
+                SubButton:Destroy()
+            end
+
+            SubButton.MouseEnter:Connect(function()
+                if Tab.ActiveSubTab == SubTab then
+                    return
+                end
+
+                if SubLabel then
+                    SubLabel.TextTransparency = 0.25
+                end
+                if SubIconLabel then
+                    SubIconLabel.ImageTransparency = 0.25
+                end
+            end)
+            SubButton.MouseLeave:Connect(function()
+                if Tab.ActiveSubTab == SubTab then
+                    return
+                end
+
+                if SubLabel then
+                    SubLabel.TextTransparency = 0.5
+                end
+                if SubIconLabel then
+                    SubIconLabel.ImageTransparency = 0.5
+                end
+            end)
+            SubButton.MouseButton1Click:Connect(function()
+                SubTab:Show()
+            end)
+
+            Tab.SubTabs[SubName] = SubTab
+            table.insert(Tab.SubTabList, SubTab)
+
+            if not Tab.ActiveSubTab then
+                SubTab:Show()
+            else
+                Tab:RefreshSides()
+            end
+
+            return SubTab
         end
 
         function Tab:Hover(Hovering)

@@ -17,7 +17,10 @@ local Window = Library:CreateWindow({
 
 local ExampleTab = Window:AddTab("Example", "box")
 
-local ExampleGroup = ExampleTab:AddLeftGroupbox("Example", "box")
+local ExampleSubOne = ExampleTab:AddSubTab("Example 1", "box")
+local ExampleSubTwo = ExampleTab:AddSubTab("Example 2", "image")
+
+local ExampleGroup = ExampleSubOne:AddLeftGroupbox("Example", "box")
 
 ExampleGroup:AddLabel("Example Label")
 ExampleGroup:AddLabel({ Text = "Example label with wrapped text that spans multiple lines", DoesWrap = true })
@@ -136,7 +139,7 @@ ExampleDepbox:SetupDependencies({
     { Toggles.ExampleToggle, true },
 })
 
-local ExampleRightGroup = ExampleTab:AddRightGroupbox("Example Media", "image")
+local ExampleRightGroup = ExampleSubTwo:AddLeftGroupbox("Example Media", "image")
 
 ExampleRightGroup:AddImage("ExampleImage", {
     Image = "rbxassetid://93909275221626",
@@ -170,7 +173,7 @@ ExampleRightGroup:AddUIPassthrough("ExamplePassthrough", {
     Height = 30,
 })
 
-local ExampleTabbox = ExampleTab:AddRightTabbox("Example Tabbox")
+local ExampleTabbox = ExampleSubOne:AddRightTabbox("Example Tabbox")
 
 local ExampleTabOne = ExampleTabbox:AddTab("Example 1")
 ExampleTabOne:AddLabel("Example Tab 1")
