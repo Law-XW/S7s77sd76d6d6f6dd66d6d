@@ -12377,9 +12377,9 @@ function Library:CreateWindow(WindowInfo)
             end
 
             if SubTabBar then
-                SubTabBar.Position = UDim2.fromOffset(2, Offset)
+                SubTabBar.Position = UDim2.fromOffset(2, Offset + 4)
 
-                local PageOffset = Offset + 40
+                local PageOffset = Offset + 44
                 for _, Page in Tab.SubTabList do
                     Page.Frame.Position = UDim2.fromOffset(0, PageOffset)
                     Page.Frame.Size = UDim2.new(1, 0, 1, -PageOffset)
@@ -13373,8 +13373,8 @@ function Library:CreateWindow(WindowInfo)
 
             local PageFrame = New("Frame", {
                 BackgroundTransparency = 1,
-                Position = UDim2.fromOffset(0, 40),
-                Size = UDim2.new(1, 0, 1, -40),
+                Position = UDim2.fromOffset(0, 44),
+                Size = UDim2.new(1, 0, 1, -44),
                 Visible = false,
                 Parent = TabContainer,
             })
