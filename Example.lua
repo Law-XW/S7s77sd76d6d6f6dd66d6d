@@ -12,7 +12,7 @@ local Window = Library:CreateWindow({
     Footer = "Example",
     NotifySide = "Right",
     ShowCustomCursor = true,
-    CornerRadius = 1,
+    CornerRadius = 5,
 })
 
 local ExampleTab = Window:AddTab("Example", "box")
@@ -242,7 +242,7 @@ MenuGroup:AddDropdown("UiDPIScale", {
 
 MenuGroup:AddSlider("UiCornerRadius", {
     Text = "Corner Radius",
-    Default = 1,
+    Default = 5,
     Min = 0,
     Max = 20,
     Rounding = 0,
