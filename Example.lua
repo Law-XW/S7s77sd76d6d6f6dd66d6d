@@ -212,6 +212,11 @@ Library:AddESPManager(Window, {
     },
 })
 
+Library:AddRivalsSkinChanger(Window, {
+    Name = "Skins",
+    Icon = "shirt",
+})
+
 local UiSettingsTab = Window:AddTab("UiSettings", "settings")
 
 local MenuGroup = UiSettingsTab:AddLeftGroupbox("Menu", "wrench")

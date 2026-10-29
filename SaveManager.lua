@@ -1121,7 +1121,13 @@ function SaveManager:BuildConfigSection(Tab: any, IconName: string)
 
     --// Refresh
     RefreshAutoloadConfigLabel()
-    SaveManager:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName", "SaveManager_JSON" })
+    SaveManager:SetIgnoreIndexes({
+        "SaveManager_ConfigList",
+        "SaveManager_ConfigName",
+        "SaveManager_JSON",
+        "RivalsSkinConfigList",
+        "RivalsSkinConfigName",
+    })
 
     return ConfigurationBox
 end
